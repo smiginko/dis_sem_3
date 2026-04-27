@@ -210,6 +210,11 @@ public class ManagerUrgentu extends OSPABA.Manager
 		}
 	}
 
+	//meta! sender="PresunDoCakarne", id="108", type="Finish"
+	public void processFinish(MessageForm message)
+	{
+	}
+
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public void init()
 	{
@@ -224,16 +229,16 @@ public class ManagerUrgentu extends OSPABA.Manager
 			processPridelenieSestry(message);
 		break;
 
-		case Mc.vstupneVysetreniePacienta:
-			processVstupneVysetreniePacienta(message);
+		case Mc.pridelenieLekara:
+			processPridelenieLekara(message);
 		break;
 
 		case Mc.osetreniePacienta:
 			processOsetreniePacienta(message);
 		break;
 
-		case Mc.pridelenieLekara:
-			processPridelenieLekara(message);
+		case Mc.finish:
+			processFinish(message);
 		break;
 
 		case Mc.obsluhaPacienta:
@@ -246,6 +251,10 @@ public class ManagerUrgentu extends OSPABA.Manager
 
 		case Mc.init:
 			processInit(message);
+		break;
+
+		case Mc.vstupneVysetreniePacienta:
+			processVstupneVysetreniePacienta(message);
 		break;
 
 		default:
