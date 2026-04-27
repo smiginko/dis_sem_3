@@ -32,21 +32,29 @@ public class ManagerOsetrenia extends OSPABA.Manager
 	//meta! sender="AgentUrgentu", id="27", type="Request"
 	public void processOsetreniePacienta(MessageForm message)
 	{
+        message.setAddressee(Id.presunDoAmbulancie);
+        startContinualAssistant(message);
 	}
 
 	//meta! sender="PresunDoAmbulancie", id="79", type="Finish"
 	public void processFinishPresunDoAmbulancie(MessageForm message)
 	{
+        message.setAddressee(Id.vykonanieOsetrenia);
+        startContinualAssistant(message);
 	}
 
 	//meta! sender="VykonanieOsetrenia", id="69", type="Finish"
 	public void processFinishVykonanieOsetrenia(MessageForm message)
 	{
+        message.setAddressee(Id.odchodPacienta);
+        startContinualAssistant(message);
 	}
 
 	//meta! sender="OdchodPacienta", id="81", type="Finish"
 	public void processFinishOdchodPacienta(MessageForm message)
 	{
+        message.setCode(Mc.osetreniePacienta);
+        response(message);
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"

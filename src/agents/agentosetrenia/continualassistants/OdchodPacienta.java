@@ -2,12 +2,16 @@ package agents.agentosetrenia.continualassistants;
 
 import OSPABA.*;
 import agents.agentosetrenia.*;
+import generatory.ContinousGenerator;
+import generatory.DiscreteGenerator;
 import simulation.*;
 import OSPABA.Process;
 
 //meta! id="80"
 public class OdchodPacienta extends OSPABA.Process
 {
+    ContinousGenerator generator;
+
 	public OdchodPacienta(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -18,11 +22,21 @@ public class OdchodPacienta extends OSPABA.Process
 	{
 		super.prepareReplication();
 		// Setup component for the next replication
+        MySimulation mySimulation = (MySimulation) mySim();
+        this.generator = new ContinousGenerator(150, 240, mySimulation.getSeedGenerator());
 	}
 
 	//meta! sender="AgentOsetrenia", id="81", type="Start"
 	public void processStart(MessageForm message)
 	{
+        if (message.lastPost() == MessageForm.PostType.start) {
+            hold(this.generator.nextDouble(), message);
+            return;
+        }
+
+        if (message.lastPost() == MessageForm.PostType.hold) {
+            assistantFinished(message);
+        }
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"

@@ -15,6 +15,8 @@ public class VyberLekara extends OSPABA.Query
 	@Override
 	public void execute(MessageForm message)
 	{
+        MyMessage msg = (MyMessage) message;
+        msg.setLekar(myAgent().vyberVolnehoLekara());
 	}
 
 	@Override

@@ -24,6 +24,8 @@ public class MyMessage extends OSPABA.MessageForm
 
     private FazaPacienta fazaPacienta;
 
+    private double casVstupuDoAktualnehoRadu;
+
 	public MyMessage(Simulation mySim)
 	{
 		super(mySim);
@@ -54,6 +56,7 @@ public class MyMessage extends OSPABA.MessageForm
         this.povolenaAmbulanciaA = original.povolenaAmbulanciaA;
         this.povolenaAmbulanciaB = original.povolenaAmbulanciaB;
         this.fazaPacienta = original.fazaPacienta;
+        this.casVstupuDoAktualnehoRadu =  original.casVstupuDoAktualnehoRadu;
 	}
 
     public Pacient getPacient() {
@@ -111,4 +114,7 @@ public class MyMessage extends OSPABA.MessageForm
     public void setFazaPacienta(FazaPacienta fazaPacienta) {
         this.fazaPacienta = fazaPacienta;
     }
+
+    public double getCasVstupuDoAktualnehoRadu() { return casVstupuDoAktualnehoRadu; }
+    public void setCasVstupuDoAktualnehoRadu(double cas) { this.casVstupuDoAktualnehoRadu = cas; }
 }

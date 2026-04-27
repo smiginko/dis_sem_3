@@ -2,12 +2,16 @@ package agents.agentosetrenia.continualassistants;
 
 import OSPABA.*;
 import agents.agentosetrenia.*;
+import generatory.ExponentialDistribution;
+import generatory.TriangularDistribution;
 import simulation.*;
 import OSPABA.Process;
 
 //meta! id="78"
 public class PresunDoAmbulancie extends OSPABA.Process
 {
+    private TriangularDistribution generator;
+
 	public PresunDoAmbulancie(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -18,11 +22,28 @@ public class PresunDoAmbulancie extends OSPABA.Process
 	{
 		super.prepareReplication();
 		// Setup component for the next replication
+        MySimulation mySimulation = (MySimulation) mySim();
+        this.generator = new TriangularDistribution(mySimulation.getSeedGenerator(), 15,45,20);
 	}
 
 	//meta! sender="AgentOsetrenia", id="79", type="Start"
 	public void processStart(MessageForm message)
 	{
+        MyMessage msg = (MyMessage) message;
+
+        if (message.lastPost() == MessageForm.PostType.start) {
+            double casSestra = generator.nextValue();
+            double casLekar = generator.nextValue();
+
+            hold(Math.max(casSestra, casLekar), message);
+            return;
+        }
+
+        if (message.lastPost() == MessageForm.PostType.hold) {
+            msg.getSestra().setPoloha(msg.getAmbulancia());
+            msg.getLekar().setPoloha(msg.getAmbulancia());
+            assistantFinished(message);
+        }
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"

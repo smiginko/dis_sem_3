@@ -32,11 +32,16 @@ public class ManagerLekarov extends OSPABA.Manager
 	//meta! sender="AgentUrgentu", id="51", type="Request"
 	public void processPridelenieLekara(MessageForm message)
 	{
+        message.setAddressee(Id.vyberLekara);
+        execute(message);
+        response(message);
 	}
 
 	//meta! sender="AgentUrgentu", id="50", type="Notice"
 	public void processUvolnenieLekara(MessageForm message)
 	{
+        message.setAddressee(Id.uvolniLekara);
+        execute(message);
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"

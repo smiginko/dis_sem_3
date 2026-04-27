@@ -9,7 +9,6 @@ import simulation.*;
 //meta! id="5"
 public class PesoScheduler extends OSPABA.Scheduler
 {
-
     private ExponentialDistribution generator;
 
 	public PesoScheduler(int id, Simulation mySim, CommonAgent myAgent)

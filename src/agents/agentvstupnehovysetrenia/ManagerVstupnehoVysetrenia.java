@@ -32,6 +32,8 @@ public class ManagerVstupnehoVysetrenia extends OSPABA.Manager
 	//meta! sender="PresunNaVstupnuKontrolu", id="72", type="Finish"
 	public void processFinishPresunNaVstupnuKontrolu(MessageForm message)
 	{
+        message.setAddressee(Id.vykonanieVysetrenia);
+        startContinualAssistant(message);
 	}
 
 	//meta! sender="VykonanieVysetrenia", id="63", type="Finish"
@@ -47,7 +49,7 @@ public class ManagerVstupnehoVysetrenia extends OSPABA.Manager
 	//meta! sender="AgentUrgentu", id="22", type="Request"
 	public void processVstupneVysetreniePacienta(MessageForm message)
 	{
-        message.setAddressee(Id.vykonanieVysetrenia);
+        message.setAddressee(Id.presunNaVstupnuKontrolu);
         startContinualAssistant(message);
 	}
 

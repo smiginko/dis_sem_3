@@ -17,7 +17,7 @@ public class Sestra extends Entity {
         this.aktualnyPacient = null;
     }
 
-    public boolean isJeObsadena() {
+    public boolean jeObsadena() {
         return jeObsadena;
     }
 

@@ -66,7 +66,7 @@ public class AgentSestier extends OSPABA.Agent
     private Sestra vyberPrvuVolnuSestru()
     {
         for (Sestra sestra : sestry) {
-            if (!sestra.isJeObsadena()) {
+            if (!sestra.jeObsadena()) {
                 sestra.setJeObsadena(true);
                 return sestra;
             }
@@ -80,6 +80,9 @@ public class AgentSestier extends OSPABA.Agent
         if (sestra != null) {
             sestra.setJeObsadena(false);
             sestra.setAktualnyPacient(null);
+            if (sestra.getAktualnaAmbulancia() != null) {
+                sestra.setPoloha(sestra.getAktualnaAmbulancia());
+            }
             sestra.setAktualnaAmbulancia(null);
         }
     }

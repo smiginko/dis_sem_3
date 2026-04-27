@@ -15,7 +15,7 @@ public class Lekar extends Entity {
         this.jeObsadeny = false;
     }
 
-    public boolean isJeObsadeny() {
+    public boolean jeObsadeny() {
         return jeObsadeny;
     }
 

@@ -1,13 +1,23 @@
 package agents.agentvstupnehovysetrenia.continualassistants;
 
 import OSPABA.*;
+import entity.Pacient;
+import generatory.ContinousEmpiricGenerator;
+import generatory.DiscreteEmpiricGenerator;
+import generatory.DiscreteGenerator;
+import generatory.EmpiricData;
 import simulation.*;
 import agents.agentvstupnehovysetrenia.*;
 import OSPABA.Process;
 
+import java.util.ArrayList;
+
 //meta! id="62"
 public class VykonanieVysetrenia extends OSPABA.Process
 {
+    ContinousEmpiricGenerator empiricGenerator;
+    DiscreteGenerator discreteGenerator;
+
 	public VykonanieVysetrenia(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -18,13 +28,21 @@ public class VykonanieVysetrenia extends OSPABA.Process
 	{
 		super.prepareReplication();
 		// Setup component for the next replication
+        MySimulation mySim = (MySimulation)super.mySim();
+
+        this.discreteGenerator = new DiscreteGenerator(4 * 60, 8 * 60, mySim.getSeedGenerator());
+
+        ArrayList<EmpiricData> empiricDataList = new ArrayList<>();
+        empiricDataList.add(new EmpiricData(3 * 60,5 * 60,0.6));
+        empiricDataList.add(new EmpiricData(5 * 60,9 * 60,0.4));
+        this.empiricGenerator = new ContinousEmpiricGenerator(mySim.getSeedGenerator(), empiricDataList);
 	}
 
 	//meta! sender="AgentVstupnehoVysetrenia", id="63", type="Start"
 	public void processStart(MessageForm message)
 	{
         if (message.lastPost() == MessageForm.PostType.start) {
-            hold(60, message);
+            hold(this.vygenerujCasVysetrenia((MyMessage) message), message);
             return;
         }
 
@@ -63,5 +81,21 @@ public class VykonanieVysetrenia extends OSPABA.Process
 	{
 		return (AgentVstupnehoVysetrenia)super.myAgent();
 	}
+
+    private double vygenerujCasVysetrenia(MyMessage msg) {
+        Pacient pacient = msg.getPacient();
+
+        double cas;
+
+        if (pacient.getTyp() == Pacient.TypPacienta.PESO) {
+            cas = empiricGenerator.nextDouble();
+        } else if (pacient.getTyp() == Pacient.TypPacienta.SANITKA) {
+            cas = discreteGenerator.nextInt();
+        } else {
+            throw new IllegalStateException("Neznamy typ pacienta: " + pacient.getTyp());
+        }
+
+        return cas;
+    }
 
 }

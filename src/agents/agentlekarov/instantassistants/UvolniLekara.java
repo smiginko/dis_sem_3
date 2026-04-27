@@ -15,6 +15,8 @@ public class UvolniLekara extends OSPABA.Action
 	@Override
 	public void execute(MessageForm message)
 	{
+        MyMessage msg = (MyMessage) message;
+        myAgent().uvolniLekara(msg.getLekar());
 	}
 
 	@Override

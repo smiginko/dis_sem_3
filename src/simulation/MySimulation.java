@@ -22,6 +22,7 @@ public class MySimulation extends OSPABA.Simulation
     private int pocetAmbulanciiB = 7;
 
     private int pocetSestier = 5;
+    private int pocetLekarov = 4;
 
 	public MySimulation()
 	{
@@ -172,5 +173,13 @@ public AgentLekarov agentLekarov()
 
     public void setPocetSestier(int pocetSestier) {
         this.pocetSestier = pocetSestier;
+    }
+
+    public int getPocetLekarov() {
+        return pocetLekarov;
+    }
+
+    public void setPocetLekarov(int pocetLekarov) {
+        this.pocetLekarov = pocetLekarov;
     }
 }
