@@ -33,8 +33,8 @@ public class ManagerUrgentu extends OSPABA.Manager
 			petriNet().clear();
 		}
 
-        radNaVstupneVysetrenie = new PriorityQueue<>(MyMessage.PORADIE_VSTUPNE);
-        radNaOsetrenie = new PriorityQueue<>(MyMessage.PORADIE_OSETRENIE);
+        radNaVstupneVysetrenie = new PriorityQueue<>(MyMessage.PORADIE);
+        radNaOsetrenie = new PriorityQueue<>(MyMessage.PORADIE);
 	}
 
 	//meta! sender="HlavnyAgent", id="15", type="Notice"
@@ -391,13 +391,13 @@ public class ManagerUrgentu extends OSPABA.Manager
 
     public List<MyMessage> getRadNaVstupneVysetrenie() {
         List<MyMessage> sorted = new ArrayList<>(radNaVstupneVysetrenie);
-        sorted.sort(MyMessage.PORADIE_VSTUPNE);
+        sorted.sort(MyMessage.PORADIE);
         return sorted;
     }
 
     public List<MyMessage> getRadNaOsetrenie() {
         List<MyMessage> sorted = new ArrayList<>(radNaOsetrenie);
-        sorted.sort(MyMessage.PORADIE_OSETRENIE);
+        sorted.sort(MyMessage.PORADIE);
         return sorted;
     }
 
