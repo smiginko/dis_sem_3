@@ -1,11 +1,16 @@
 package agents.agentsestier;
 
 import OSPABA.*;
+import entity.Sestra;
 import simulation.*;
+
+import java.util.PriorityQueue;
 
 //meta! id="35"
 public class ManagerSestier extends OSPABA.Manager
 {
+    PriorityQueue<MyMessage> radCakajucich;
+
 	public ManagerSestier(int id, Simulation mySim, Agent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -22,6 +27,8 @@ public class ManagerSestier extends OSPABA.Manager
 		{
 			petriNet().clear();
 		}
+
+        this.radCakajucich = new PriorityQueue<>(MyMessage.PORADIE_OSETRENIE);
 	}
 
 	//meta! sender="AgentUrgentu", id="39", type="Notice"
@@ -32,16 +39,26 @@ public class ManagerSestier extends OSPABA.Manager
 	//meta! sender="AgentUrgentu", id="44", type="Request"
 	public void processPridelenieSestry(MessageForm message)
 	{
-        message.setAddressee(Id.vyberSestru);
-        execute(message);
-        response(message);
+        MyMessage msg = (MyMessage) message;
+
+        Sestra volnaSestra = myAgent().vyberVolnuSestru();
+
+        if (volnaSestra != null) {
+            msg.setSestra(volnaSestra);
+            response(msg);
+        } else  {
+            radCakajucich.offer(msg);
+        }
 	}
 
 	//meta! sender="AgentUrgentu", id="43", type="Notice"
 	public void processUvolnenieSestry(MessageForm message)
 	{
-        message.setAddressee(Id.uvolniSestru);
-        execute(message);
+        MyMessage msg = (MyMessage) message;
+
+        myAgent().uvolniSestru(msg.getSestra());
+
+        skusPridatSestruDalsiemu();
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"
@@ -86,5 +103,17 @@ public class ManagerSestier extends OSPABA.Manager
 	{
 		return (AgentSestier)super.myAgent();
 	}
+
+    private void skusPridatSestruDalsiemu() {
+        if (!radCakajucich.isEmpty()) {
+            Sestra volnaSestra = myAgent().vyberVolnuSestru();
+
+            if (volnaSestra != null) {
+                MyMessage cakajucaSprava = radCakajucich.poll();
+                cakajucaSprava.setSestra(volnaSestra);
+                response(cakajucaSprava);
+            }
+        }
+    }
 
 }

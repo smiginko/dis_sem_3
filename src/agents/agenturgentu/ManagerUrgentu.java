@@ -53,6 +53,9 @@ public class ManagerUrgentu extends OSPABA.Manager
 
         message.setAddressee(Id.presunZCakarne);
         startContinualAssistant(message);
+
+        skusSpustitOsetrenie();
+        skusSpustitVstupneVysetrenie();
 	}
 
 	//meta! sender="AgentSestier", id="44", type="Response"
@@ -60,14 +63,9 @@ public class ManagerUrgentu extends OSPABA.Manager
 	{
         MyMessage msg = (MyMessage) message;
 
-        if (msg.getFazaPacienta() == MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE) {
-            if (msg.getSestra() == null) {
-                uvolniAmbulanciuPreMsg(msg);
-                vratDoRaduVstupne(msg);
-                return;
-            }
+        nastavSestruPacientovi(msg);
 
-            nastavSestruPacientovi(msg);
+        if (msg.getFazaPacienta() == MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE) {
 
             System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id()
                     + " ZACINA vstupne vysetrenie ambulancia="
@@ -81,17 +79,6 @@ public class ManagerUrgentu extends OSPABA.Manager
         }
 
         if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
-            if (msg.getSestra() == null) {
-                uvolniLekaraPreMsg(msg);
-                uvolniAmbulanciuPreMsg(msg);
-                System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id()
-                        + " caka dalej faza=" + msg.getFazaPacienta()
-                        + " - nie je sestra");
-                vratDoRaduOsetrenie(msg);
-                return;
-            }
-
-            nastavSestruPacientovi(msg);
 
             System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id()
                     + " ZACINA osetrenie ambulancia="
@@ -114,20 +101,6 @@ public class ManagerUrgentu extends OSPABA.Manager
 	{
         MyMessage msg = (MyMessage) message;
 
-        if (msg.getAmbulancia() == null) {
-            if (msg.getFazaPacienta() == MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE) {
-                System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id() + "nedostal ambulanciu - všetky sú plné");
-                vratDoRaduVstupne(msg);
-                return;
-            }
-
-            if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
-                System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id() + "nedostal ambulanciu - všetky sú plné");
-                vratDoRaduOsetrenie(msg);
-                return;
-            }
-        }
-
         msg.getPacient().setAktualnaAmbulancia(msg.getAmbulancia());
 
         if (msg.getFazaPacienta() == MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE) {
@@ -135,7 +108,6 @@ public class ManagerUrgentu extends OSPABA.Manager
             message.setCode(Mc.pridelenieSestry);
             message.setAddressee(Id.agentSestier);
             request(message);
-            return;
         }
 
         if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
@@ -150,14 +122,6 @@ public class ManagerUrgentu extends OSPABA.Manager
 	public void processPridelenieLekara(MessageForm message)
 	{
         MyMessage msg = (MyMessage) message;
-
-        if (msg.getLekar() == null) {
-            uvolniAmbulanciuPreMsg(msg);
-            System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id()
-                    + " caka dalej na osetrenie - nie je lekar");
-            vratDoRaduOsetrenie(msg);
-            return;
-        }
 
         Pacient pacient = msg.getPacient();
         Lekar lekar = msg.getLekar();
@@ -413,10 +377,6 @@ public class ManagerUrgentu extends OSPABA.Manager
         radNaVstupneVysetrenie.offer(msg);
     }
 
-    private void vratDoRaduVstupne(MyMessage msg) {
-        radNaVstupneVysetrenie.offer(msg);
-    }
-
     private MyMessage vyberZRaduVstupne() {
         return radNaVstupneVysetrenie.poll();
     }
@@ -430,10 +390,6 @@ public class ManagerUrgentu extends OSPABA.Manager
         }
 
         msg.setCasVstupuDoAktualnehoRadu(mySim().currentTime());
-        radNaOsetrenie.offer(msg);
-    }
-
-    private void vratDoRaduOsetrenie(MyMessage msg) {
         radNaOsetrenie.offer(msg);
     }
 

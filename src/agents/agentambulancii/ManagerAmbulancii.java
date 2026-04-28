@@ -1,11 +1,16 @@
 package agents.agentambulancii;
 
 import OSPABA.*;
+import entity.Ambulancia;
 import simulation.*;
+
+import java.util.PriorityQueue;
 
 //meta! id="29"
 public class ManagerAmbulancii extends OSPABA.Manager
 {
+    PriorityQueue<MyMessage> radCakajucich;
+
 	public ManagerAmbulancii(int id, Simulation mySim, Agent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -22,6 +27,7 @@ public class ManagerAmbulancii extends OSPABA.Manager
 		{
 			petriNet().clear();
 		}
+        this.radCakajucich = new PriorityQueue<>(MyMessage.PORADIE_VSTUPNE);
 	}
 
 	//meta! sender="AgentUrgentu", id="31", type="Notice"
@@ -32,16 +38,26 @@ public class ManagerAmbulancii extends OSPABA.Manager
 	//meta! sender="AgentUrgentu", id="32", type="Request"
 	public void processPridelenieAmbulancie(MessageForm message)
 	{
-        message.setAddressee(Id.vyberAmbulanciu);
-        execute(message);
-        response(message);
+        MyMessage msg = (MyMessage) message;
+
+        Ambulancia volnaAmbulancia = myAgent().vyberVolnuAmbulanciu(msg.isPovolenaAmbulanciaA(), msg.isPovolenaAmbulanciaB());
+
+        if (volnaAmbulancia != null) {
+            msg.setAmbulancia(volnaAmbulancia);
+            response(msg);
+        } else {
+            radCakajucich.offer(msg);
+        }
 	}
 
 	//meta! sender="AgentUrgentu", id="34", type="Notice"
 	public void processUvolnenieAmbulancie(MessageForm message)
 	{
-        message.setAddressee(Id.uvolniAmbulanciu);
-        execute(message);
+        MyMessage msg = (MyMessage) message;
+
+        myAgent().uvolniAmbulanciu(msg.getAmbulancia());
+
+        skusPridatAmbulanciuDalsiemu();
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"
@@ -87,4 +103,15 @@ public class ManagerAmbulancii extends OSPABA.Manager
 		return (AgentAmbulancii)super.myAgent();
 	}
 
+    private void skusPridatAmbulanciuDalsiemu() {
+        for (MyMessage msg : radCakajucich) {
+            Ambulancia a = myAgent().vyberVolnuAmbulanciu(msg.isPovolenaAmbulanciaA(), msg.isPovolenaAmbulanciaB());
+            if (a != null) {
+                radCakajucich.remove(msg);
+                msg.setAmbulancia(a);
+                response(msg);
+                break;
+            }
+        }
+    }
 }
