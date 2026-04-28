@@ -7,17 +7,14 @@ import entity.Pacient;
 import entity.Sestra;
 import simulation.*;
 
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 //meta! id="14"
 public class ManagerUrgentu extends OSPABA.Manager
 {
 
-    private Deque<MyMessage> radNaVstupneVysetrenie;
-    private List<Deque<MyMessage>> radyNaOsetrenie;
+    private PriorityQueue<MyMessage> radNaVstupneVysetrenie;
+    private PriorityQueue<MyMessage> radNaOsetrenie;
 
 	public ManagerUrgentu(int id, Simulation mySim, Agent myAgent)
 	{
@@ -36,12 +33,8 @@ public class ManagerUrgentu extends OSPABA.Manager
 			petriNet().clear();
 		}
 
-        radNaVstupneVysetrenie = new LinkedList<>();
-
-        radyNaOsetrenie = new ArrayList<>();
-        for (int i = 0; i <= 5; i++) {
-            radyNaOsetrenie.add(new LinkedList<>());
-        }
+        radNaVstupneVysetrenie = new PriorityQueue<>(MyMessage.PORADIE_VSTUPNE);
+        radNaOsetrenie = new PriorityQueue<>(MyMessage.PORADIE_OSETRENIE);
 	}
 
 	//meta! sender="HlavnyAgent", id="15", type="Notice"
@@ -53,10 +46,6 @@ public class ManagerUrgentu extends OSPABA.Manager
 	public void processOsetreniePacienta(MessageForm message)
 	{
         MyMessage msg = (MyMessage) message;
-
-        uvolniSestruPreMsg(msg);
-        uvolniLekaraPreMsg(msg);
-        uvolniAmbulanciuPreMsg(msg);
 
         message.setCode(Mc.obsluhaPacienta);
         response(message);
@@ -73,11 +62,17 @@ public class ManagerUrgentu extends OSPABA.Manager
         if (msg.getFazaPacienta() == MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE) {
             if (msg.getSestra() == null) {
                 uvolniAmbulanciuPreMsg(msg);
-                vratNaZaciatokRaduVstupne(msg);
+                vratDoRaduVstupne(msg);
                 return;
             }
 
             nastavSestruPacientovi(msg);
+
+            System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id()
+                    + " ZACINA vstupne vysetrenie ambulancia="
+                    + msg.getAmbulancia().id()
+                    + " sestra="
+                    + msg.getSestra().id());
 
             message.setCode(Mc.vstupneVysetreniePacienta);
             message.setAddressee(Id.agentVstupnehoVysetrenia);
@@ -88,11 +83,24 @@ public class ManagerUrgentu extends OSPABA.Manager
             if (msg.getSestra() == null) {
                 uvolniLekaraPreMsg(msg);
                 uvolniAmbulanciuPreMsg(msg);
-                vratNaZaciatokRaduOsetrenie(msg);
+                System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id()
+                        + " caka dalej faza=" + msg.getFazaPacienta()
+                        + " - nie je sestra");
+                vratDoRaduOsetrenie(msg);
                 return;
             }
 
             nastavSestruPacientovi(msg);
+
+            System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id()
+                    + " ZACINA osetrenie ambulancia="
+                    + msg.getAmbulancia().id()
+                    + " lekar="
+                    + msg.getLekar().id()
+                    + " sestra="
+                    + msg.getSestra().id()
+                    + " priorita="
+                    + msg.getPacient().getPriorita());
 
             message.setCode(Mc.osetreniePacienta);
             message.setAddressee(Id.agentOsetrenia);
@@ -107,12 +115,14 @@ public class ManagerUrgentu extends OSPABA.Manager
 
         if (msg.getAmbulancia() == null) {
             if (msg.getFazaPacienta() == MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE) {
-                vratNaZaciatokRaduVstupne(msg);
+                System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id() + "nedostal ambulanciu - všetky sú plné");
+                vratDoRaduVstupne(msg);
                 return;
             }
 
             if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
-                vratNaZaciatokRaduOsetrenie(msg);
+                System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id() + "nedostal ambulanciu - všetky sú plné");
+                vratDoRaduOsetrenie(msg);
                 return;
             }
         }
@@ -120,9 +130,6 @@ public class ManagerUrgentu extends OSPABA.Manager
         msg.getPacient().setAktualnaAmbulancia(msg.getAmbulancia());
 
         if (msg.getFazaPacienta() == MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE) {
-            System.out.println("Pacient id=" + msg.getPacient().id()
-                    + " dostal ambulanciu na vstupne vysetrenie id="
-                    + msg.getAmbulancia().id());
 
             message.setCode(Mc.pridelenieSestry);
             message.setAddressee(Id.agentSestier);
@@ -131,11 +138,6 @@ public class ManagerUrgentu extends OSPABA.Manager
         }
 
         if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
-            System.out.println("Pacient id=" + msg.getPacient().id()
-                    + " dostal ambulanciu na osetrenie id="
-                    + msg.getAmbulancia().id()
-                    + " priorita="
-                    + msg.getPacient().getPriorita());
 
             message.setCode(Mc.pridelenieLekara);
             message.setAddressee(Id.agentLekarov);
@@ -150,7 +152,9 @@ public class ManagerUrgentu extends OSPABA.Manager
 
         if (msg.getLekar() == null) {
             uvolniAmbulanciuPreMsg(msg);
-            vratNaZaciatokRaduOsetrenie(msg);
+            System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id()
+                    + " caka dalej na osetrenie - nie je lekar");
+            vratDoRaduOsetrenie(msg);
             return;
         }
 
@@ -172,17 +176,23 @@ public class ManagerUrgentu extends OSPABA.Manager
 	{
         MyMessage msg = (MyMessage) message;
 
-        System.out.println("Urgent prevzal pacienta id="
+        System.out.println("[" + mySim().currentTime() + "] " + "Urgent prevzal pacienta id="
                 + msg.getPacient().id()
                 + " typ="
                 + msg.getPacient().getTyp());
+
+        if (msg.getPacient().getTyp() == Pacient.TypPacienta.SANITKA) {
+            msg.getPacient().setPriorita(0);
+        } else {
+            msg.getPacient().setPriorita(10);
+        }
 
         msg.setFazaPacienta(MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE);
         msg.setPovolenaAmbulanciaA(false);
         msg.setPovolenaAmbulanciaB(true);
 
-        vlozDoRaduVstupne(msg);
-        skusSpustitVstupneVysetrenie();
+        message.setAddressee(Id.presunDoCakarne);
+        startContinualAssistant(message);
 	}
 
 	//meta! sender="AgentVstupnehoVysetrenia", id="22", type="Response"
@@ -213,6 +223,20 @@ public class ManagerUrgentu extends OSPABA.Manager
 	//meta! sender="PresunDoCakarne", id="108", type="Finish"
 	public void processFinish(MessageForm message)
 	{
+        MyMessage msg = (MyMessage) message;
+
+        switch (message.sender().id()) {
+            case Id.presunDoCakarne:
+                vlozDoRaduVstupne(msg);
+                System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id()
+                        + " prisiel do cakarne");
+                skusSpustitVstupneVysetrenie();
+                break;
+
+            default:
+                processDefault(message);
+                break;
+        }
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"
@@ -367,47 +391,38 @@ public class ManagerUrgentu extends OSPABA.Manager
         msg.setSestra(null);
     }
 
-    //-----------Rady
+    //Rady---------
     private void vlozDoRaduVstupne(MyMessage msg) {
         msg.setCasVstupuDoAktualnehoRadu(mySim().currentTime());
-        radNaVstupneVysetrenie.addLast(msg);
+        radNaVstupneVysetrenie.offer(msg);
     }
 
-    private void vratNaZaciatokRaduVstupne(MyMessage msg) {
-        radNaVstupneVysetrenie.addFirst(msg);
+    private void vratDoRaduVstupne(MyMessage msg) {
+        radNaVstupneVysetrenie.offer(msg);
     }
 
     private MyMessage vyberZRaduVstupne() {
-        MyMessage msg = radNaVstupneVysetrenie.pollFirst();
-
-        if (msg != null) {
-            double cakanie = mySim().currentTime() - msg.getCasVstupuDoAktualnehoRadu();
-            // TODO: STAT čakanie na vstupne vysetrenie
-        }
-
-        return msg;
+        return radNaVstupneVysetrenie.poll();
     }
 
     private void vlozDoRaduOsetrenie(MyMessage msg) {
+        int priorita = msg.getPacient().getPriorita();
+
+        if (priorita < 1 || priorita > 5) {
+            throw new IllegalStateException("Pacient id=" + msg.getPacient().id()
+                    + " ma neplatnu prioritu pre osetrenie: " + priorita);
+        }
+
         msg.setCasVstupuDoAktualnehoRadu(mySim().currentTime());
-        radyNaOsetrenie.get(msg.getPacient().getPriorita()).addLast(msg);
+        radNaOsetrenie.offer(msg);
     }
 
-    private void vratNaZaciatokRaduOsetrenie(MyMessage msg) {
-        radyNaOsetrenie.get(msg.getPacient().getPriorita()).addFirst(msg);
+    private void vratDoRaduOsetrenie(MyMessage msg) {
+        radNaOsetrenie.offer(msg);
     }
 
     private MyMessage vyberZRaduOsetrenie() {
-        for (int priorita = 1; priorita <= 5; priorita++) {
-            MyMessage msg = radyNaOsetrenie.get(priorita).pollFirst();
-
-            if (msg != null) {
-                double cakanie = mySim().currentTime() - msg.getCasVstupuDoAktualnehoRadu();
-                // TODO: STAT čakanie na ošetrenie
-                return msg;
-            }
-        }
-
-        return null;
+        return radNaOsetrenie.poll();
     }
+
 }

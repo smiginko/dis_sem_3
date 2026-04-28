@@ -6,6 +6,8 @@ import entity.Lekar;
 import entity.Pacient;
 import entity.Sestra;
 
+import java.util.Comparator;
+
 public class MyMessage extends OSPABA.MessageForm
 {
     public enum FazaPacienta {
@@ -117,4 +119,17 @@ public class MyMessage extends OSPABA.MessageForm
 
     public double getCasVstupuDoAktualnehoRadu() { return casVstupuDoAktualnehoRadu; }
     public void setCasVstupuDoAktualnehoRadu(double cas) { this.casVstupuDoAktualnehoRadu = cas; }
+
+    public static final Comparator<MyMessage> PORADIE_VSTUPNE =
+            Comparator
+                    .comparingInt((MyMessage msg) ->
+                            msg.getPacient().getTyp() == Pacient.TypPacienta.SANITKA ? 0 : 1)
+                    .thenComparingDouble(MyMessage::getCasVstupuDoAktualnehoRadu)
+                    .thenComparingInt(msg -> msg.getPacient().id());
+
+    public static final Comparator<MyMessage> PORADIE_OSETRENIE =
+            Comparator
+                    .comparingInt((MyMessage msg) -> msg.getPacient().getPriorita())
+                    .thenComparingDouble(MyMessage::getCasVstupuDoAktualnehoRadu)
+                    .thenComparingInt(msg -> msg.getPacient().id());
 }

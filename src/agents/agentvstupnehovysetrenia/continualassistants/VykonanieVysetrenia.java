@@ -30,7 +30,7 @@ public class VykonanieVysetrenia extends OSPABA.Process
 		// Setup component for the next replication
         MySimulation mySim = (MySimulation)super.mySim();
 
-        this.discreteGenerator = new DiscreteGenerator(4 * 60, 8 * 60, mySim.getSeedGenerator());
+        this.discreteGenerator = new DiscreteGenerator(4, 8, mySim.getSeedGenerator());
 
         ArrayList<EmpiricData> empiricDataList = new ArrayList<>();
         empiricDataList.add(new EmpiricData(3 * 60,5 * 60,0.6));
@@ -90,7 +90,7 @@ public class VykonanieVysetrenia extends OSPABA.Process
         if (pacient.getTyp() == Pacient.TypPacienta.PESO) {
             cas = empiricGenerator.nextDouble();
         } else if (pacient.getTyp() == Pacient.TypPacienta.SANITKA) {
-            cas = discreteGenerator.nextInt();
+            cas = discreteGenerator.nextInt() * 60;
         } else {
             throw new IllegalStateException("Neznamy typ pacienta: " + pacient.getTyp());
         }

@@ -46,6 +46,10 @@ public class ManagerOsetrenia extends OSPABA.Manager
 	//meta! sender="VykonanieOsetrenia", id="69", type="Finish"
 	public void processFinishVykonanieOsetrenia(MessageForm message)
 	{
+        MyMessage msg = (MyMessage) message;
+
+        uvolniZdrojePredOdchodom(msg);
+
         message.setAddressee(Id.odchodPacienta);
         startContinualAssistant(message);
 	}
@@ -112,5 +116,41 @@ public class ManagerOsetrenia extends OSPABA.Manager
 	{
 		return (AgentOsetrenia)super.myAgent();
 	}
+
+    private void uvolniZdrojePredOdchodom(MyMessage msg)
+    {
+        if (msg.getSestra() != null) {
+            MyMessage uvolnenie = new MyMessage(mySim());
+            uvolnenie.setCode(Mc.uvolnenieSestry);
+            uvolnenie.setAddressee(Id.agentSestier);
+            uvolnenie.setSestra(msg.getSestra());
+            notice(uvolnenie);
+
+            msg.getPacient().setAktualnaSestra(null);
+            msg.setSestra(null);
+        }
+
+        if (msg.getLekar() != null) {
+            MyMessage uvolnenie = new MyMessage(mySim());
+            uvolnenie.setCode(Mc.uvolnenieLekara);
+            uvolnenie.setAddressee(Id.agentLekarov);
+            uvolnenie.setLekar(msg.getLekar());
+            notice(uvolnenie);
+
+            msg.getPacient().setAktualnyLekar(null);
+            msg.setLekar(null);
+        }
+
+        if (msg.getAmbulancia() != null) {
+            MyMessage uvolnenie = new MyMessage(mySim());
+            uvolnenie.setCode(Mc.uvolnenieAmbulancie);
+            uvolnenie.setAddressee(Id.agentAmbulancii);
+            uvolnenie.setAmbulancia(msg.getAmbulancia());
+            notice(uvolnenie);
+
+            msg.getPacient().setAktualnaAmbulancia(null);
+            msg.setAmbulancia(null);
+        }
+    }
 
 }
