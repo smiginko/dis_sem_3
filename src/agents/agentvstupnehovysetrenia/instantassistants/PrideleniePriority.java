@@ -43,8 +43,7 @@ public class PrideleniePriority extends OSPABA.Action
 
         pacient.setPriorita(priorita);
 
-        System.out.println("Pacient id=" + pacient.id()
-                + " dostal prioritu " + priorita);
+        ((MySimulation) mySim()).log("Pacient id=" + pacient.id() + " dostal prioritu " + priorita);
     }
 
 	@Override

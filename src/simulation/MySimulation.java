@@ -16,6 +16,11 @@ public class MySimulation extends OSPABA.Simulation
 {
     private StrategiaPridelovania strategiaPridelovania = StrategiaPridelovania.PRVA_VOLNA;
 
+    // 1.0 = 1x reálny čas, 0.1 = 10x, null = turbo
+    private Double desiredSpeedDuration = null;
+
+    private final java.util.List<String> logs = new java.util.ArrayList<>();
+
     Random seedGenerator;
 
     private int pocetAmbulanciiA = 5;
@@ -41,6 +46,13 @@ public class MySimulation extends OSPABA.Simulation
 	public void prepareReplication()
 	{
 		super.prepareReplication();
+        logs.clear();
+
+        if (desiredSpeedDuration != null) {
+            setSimSpeed(1.0, desiredSpeedDuration);
+        } else {
+            setMaxSimSpeed();
+        }
 
         MyMessage message = new MyMessage(this);
         message.setCode(Mc.init);
@@ -181,5 +193,31 @@ public AgentLekarov agentLekarov()
 
     public void setPocetLekarov(int pocetLekarov) {
         this.pocetLekarov = pocetLekarov;
+    }
+
+    public void setDesiredSpeed(double durationSeconds) {
+        this.desiredSpeedDuration = durationSeconds;
+    }
+
+    public void setTurboDesired() {
+        this.desiredSpeedDuration = null;
+    }
+
+    public void log(String message) {
+        if (isMaxSpeed()) return;
+        String formatted = String.format("[%s] %s", formatCas(currentTime()), message);
+        logs.add(formatted);
+    }
+
+    public java.util.List<String> getNewLogs() {
+        java.util.List<String> copy = new java.util.ArrayList<>(logs);
+        logs.clear();
+        return copy;
+    }
+
+    private String formatCas(double totalSeconds) {
+        if (Double.isNaN(totalSeconds) || totalSeconds < 0) return "00:00:00";
+        int total = (int) Math.round(totalSeconds);
+        return String.format("%02d:%02d:%02d", total / 3600, (total % 3600) / 60, total % 60);
     }
 }

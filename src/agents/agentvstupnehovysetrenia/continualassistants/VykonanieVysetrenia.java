@@ -42,7 +42,11 @@ public class VykonanieVysetrenia extends OSPABA.Process
 	public void processStart(MessageForm message)
 	{
         if (message.lastPost() == MessageForm.PostType.start) {
-            hold(this.vygenerujCasVysetrenia((MyMessage) message), message);
+            MyMessage msg = (MyMessage) message;
+            double dur = vygenerujCasVysetrenia(msg);
+            ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
+                    + " vstupné vyšetrenie: " + String.format("%.0f", dur) + "s");
+            hold(dur, message);
             return;
         }
 

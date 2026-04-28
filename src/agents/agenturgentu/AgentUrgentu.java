@@ -3,6 +3,7 @@ package agents.agenturgentu;
 import OSPABA.*;
 import simulation.*;
 import agents.agenturgentu.continualassistants.*;
+import java.util.List;
 
 //meta! id="14"
 public class AgentUrgentu extends OSPABA.Agent
@@ -35,4 +36,12 @@ public class AgentUrgentu extends OSPABA.Agent
 		addOwnMessage(Mc.vstupneVysetreniePacienta);
 	}
 	//meta! tag="end"
+
+    public List<MyMessage> getRadNaVstupneVysetrenie() {
+        return ((ManagerUrgentu) myManager()).getRadNaVstupneVysetrenie();
+    }
+
+    public List<MyMessage> getRadNaOsetrenie() {
+        return ((ManagerUrgentu) myManager()).getRadNaOsetrenie();
+    }
 }

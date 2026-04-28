@@ -29,12 +29,12 @@ public class VykonanieOsetrenia extends OSPABA.Process
 		super.prepareReplication();
 		// Setup component for the next replication
         MySimulation mySimulation = (MySimulation) mySim();
-        this.continousGenerator = new ContinousGenerator(15 * 60,30 * 60, mySimulation.getSeedGenerator());
+        this.continousGenerator = new ContinousGenerator(15,30, mySimulation.getSeedGenerator());
 
         ArrayList<EmpiricData> empiricDataList = new ArrayList<>();
-        empiricDataList.add(new EmpiricData(10 * 60,12 * 60,0.1));
-        empiricDataList.add(new EmpiricData(12 * 60,14 * 60,0.6));
-        empiricDataList.add(new EmpiricData(14 * 60,18 * 60,0.3));
+        empiricDataList.add(new EmpiricData(10,12,0.1));
+        empiricDataList.add(new EmpiricData(12,14,0.6));
+        empiricDataList.add(new EmpiricData(14,18,0.3));
         this.empiricGenerator = new ContinousEmpiricGenerator(mySimulation.getSeedGenerator(), empiricDataList);
 	}
 
@@ -42,7 +42,11 @@ public class VykonanieOsetrenia extends OSPABA.Process
 	public void processStart(MessageForm message)
 	{
         if (message.lastPost() == MessageForm.PostType.start) {
-            hold(vygenerujCasOsetrenia((MyMessage) message), message);
+            MyMessage msg = (MyMessage) message;
+            double dur = vygenerujCasOsetrenia(msg);
+            ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
+                    + " ošetrenie: " + String.format("%.0f", dur) + "s");
+            hold(dur, message);
             return;
         }
 
@@ -95,7 +99,7 @@ public class VykonanieOsetrenia extends OSPABA.Process
             throw new IllegalStateException("Neznamy typ pacienta: " + pacient.getTyp());
         }
 
-        return cas;
+        return cas * 60;
     }
 
 }

@@ -67,11 +67,9 @@ public class ManagerUrgentu extends OSPABA.Manager
 
         if (msg.getFazaPacienta() == MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE) {
 
-            System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id()
-                    + " ZACINA vstupne vysetrenie ambulancia="
-                    + msg.getAmbulancia().id()
-                    + " sestra="
-                    + msg.getSestra().id());
+            ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
+                    + " ZAČÍNA vstupné vyšetrenie amb=" + msg.getAmbulancia().id()
+                    + " sestra=" + msg.getSestra().id());
 
             message.setCode(Mc.vstupneVysetreniePacienta);
             message.setAddressee(Id.agentVstupnehoVysetrenia);
@@ -80,15 +78,11 @@ public class ManagerUrgentu extends OSPABA.Manager
 
         if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
 
-            System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id()
-                    + " ZACINA osetrenie ambulancia="
-                    + msg.getAmbulancia().id()
-                    + " lekar="
-                    + msg.getLekar().id()
-                    + " sestra="
-                    + msg.getSestra().id()
-                    + " priorita="
-                    + msg.getPacient().getPriorita());
+            ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
+                    + " ZAČÍNA ošetrenie amb=" + msg.getAmbulancia().id()
+                    + " lekár=" + msg.getLekar().id()
+                    + " sestra=" + msg.getSestra().id()
+                    + " priorita=" + msg.getPacient().getPriorita());
 
             message.setCode(Mc.osetreniePacienta);
             message.setAddressee(Id.agentOsetrenia);
@@ -141,10 +135,8 @@ public class ManagerUrgentu extends OSPABA.Manager
 	{
         MyMessage msg = (MyMessage) message;
 
-        System.out.println("[" + mySim().currentTime() + "] " + "Urgent prevzal pacienta id="
-                + msg.getPacient().id()
-                + " typ="
-                + msg.getPacient().getTyp());
+        ((MySimulation) mySim()).log("Urgent prevzal pacienta id=" + msg.getPacient().id()
+                + " typ=" + msg.getPacient().getTyp());
 
         msg.setFazaPacienta(MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE);
         msg.setPovolenaAmbulanciaA(false);
@@ -166,6 +158,8 @@ public class ManagerUrgentu extends OSPABA.Manager
         nastavPovoleneAmbulanciePreOsetrenie(msg);
 
         vlozDoRaduOsetrenie(msg);
+        ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
+                + " vstúpil do frontu na ošetrenie (priorita " + msg.getPacient().getPriorita() + ")");
 
         skusSpustitOsetrenie();
         skusSpustitVstupneVysetrenie();
@@ -187,8 +181,7 @@ public class ManagerUrgentu extends OSPABA.Manager
         switch (message.sender().id()) {
             case Id.presunDoCakarne:
                 vlozDoRaduVstupne(msg);
-                System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id()
-                        + " prisiel do cakarne");
+                ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id() + " prišiel do čakárne");
                 skusSpustitVstupneVysetrenie();
                 break;
 
@@ -203,8 +196,7 @@ public class ManagerUrgentu extends OSPABA.Manager
 	{
         MyMessage msg = (MyMessage) message;
 
-        System.out.println("[" + mySim().currentTime() + "] Pacient id="
-                + msg.getPacient().id() + " dokoncil odchod z urgentu");
+        ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id() + " dokončil odchod z urgentu");
 
         message.setCode(Mc.obsluhaPacienta);
         response(message);
@@ -395,6 +387,18 @@ public class ManagerUrgentu extends OSPABA.Manager
 
     private MyMessage vyberZRaduOsetrenie() {
         return radNaOsetrenie.poll();
+    }
+
+    public List<MyMessage> getRadNaVstupneVysetrenie() {
+        List<MyMessage> sorted = new ArrayList<>(radNaVstupneVysetrenie);
+        sorted.sort(MyMessage.PORADIE_VSTUPNE);
+        return sorted;
+    }
+
+    public List<MyMessage> getRadNaOsetrenie() {
+        List<MyMessage> sorted = new ArrayList<>(radNaOsetrenie);
+        sorted.sort(MyMessage.PORADIE_OSETRENIE);
+        return sorted;
     }
 
 }

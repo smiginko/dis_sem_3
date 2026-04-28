@@ -4,12 +4,18 @@ import OSPABA.*;
 import entity.Sestra;
 import simulation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.PriorityQueue;
 
 //meta! id="35"
 public class ManagerSestier extends OSPABA.Manager
 {
     PriorityQueue<MyMessage> radCakajucich;
+
+    public List<MyMessage> getRadCakajucich() {
+        return new ArrayList<>(radCakajucich);
+    }
 
 	public ManagerSestier(int id, Simulation mySim, Agent myAgent)
 	{
@@ -28,7 +34,7 @@ public class ManagerSestier extends OSPABA.Manager
 			petriNet().clear();
 		}
 
-        this.radCakajucich = new PriorityQueue<>(MyMessage.PORADIE_OSETRENIE);
+        this.radCakajucich = new PriorityQueue<>(MyMessage.PORADIE);
 	}
 
 	//meta! sender="AgentUrgentu", id="39", type="Notice"
@@ -46,7 +52,9 @@ public class ManagerSestier extends OSPABA.Manager
         if (volnaSestra != null) {
             msg.setSestra(volnaSestra);
             response(msg);
-        } else  {
+        } else {
+            ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
+                    + " čaká na sestru");
             radCakajucich.offer(msg);
         }
 	}

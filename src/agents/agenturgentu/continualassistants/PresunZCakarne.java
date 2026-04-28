@@ -28,8 +28,13 @@ public class PresunZCakarne extends OSPABA.Process
 	//meta! sender="AgentUrgentu", id="115", type="Start"
 	public void processStart(MessageForm message)
 	{
+        MyMessage msg = (MyMessage) message;
+
         if (message.lastPost() == MessageForm.PostType.start) {
-            hold(generator.nextDouble(), message);
+            double cas = generator.nextDouble();
+            ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
+                    + " odchod z urgentu: " + String.format("%.0f", cas) + "s");
+            hold(cas, message);
             return;
         }
 

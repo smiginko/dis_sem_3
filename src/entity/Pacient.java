@@ -24,6 +24,7 @@ public class Pacient extends Entity {
         this.aktualnaAmbulancia = null;
         this.aktualnaSestra = null;
         this.aktualnyLekar = null;
+        this.inicializujPrioritu(typ);
     }
 
     public TypPacienta getTyp() {
@@ -72,6 +73,14 @@ public class Pacient extends Entity {
 
     public void setAktualnyLekar(Lekar aktualnyLekar) {
         this.aktualnyLekar = aktualnyLekar;
+    }
+
+    private void inicializujPrioritu(TypPacienta typ) {
+        if (typ == TypPacienta.SANITKA) {
+            this.priorita = 10;
+            } else {
+                this.priorita = 20;
+            }
     }
 }
 

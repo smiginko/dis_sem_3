@@ -40,7 +40,7 @@ public class ManagerOkolia extends OSPABA.Manager
 	public void processOdchodPacienta(MessageForm message)
 	{
         MyMessage msg = (MyMessage) message;
-        System.out.println("[" + mySim().currentTime() + "] " + "Pacient id=" + msg.getPacient().id() + " opustil urgentný príjem");
+        ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id() + " opustil urgentný príjem");
     }
 
 	//meta! sender="ZachrankaScheduler", id="59", type="Finish"

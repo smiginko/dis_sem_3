@@ -45,8 +45,7 @@ public class ZachrankaScheduler extends OSPABA.Scheduler
 
             msg.setPacient(pacient);
 
-            System.out.println("Vznikol SANITKA pacient id=" + pacient.id()
-                    + " v case " + mySim().currentTime());
+            ((MySimulation) mySim()).log("Vznikol SANITKA pacient id=" + pacient.id());
 
             assistantFinished(msg);
 

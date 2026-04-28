@@ -9,13 +9,18 @@ import java.util.List;
 //meta! id="29"
 public class AgentAmbulancii extends OSPABA.Agent
 {
-    private List<Ambulancia> ambulancie = new ArrayList<>();
+
+    private final List<Ambulancia> ambulancie = new ArrayList<>();
 
 	public AgentAmbulancii(int id, Simulation mySim, Agent parent)
 	{
 		super(id, mySim, parent);
 		init();
 	}
+
+    public List<MyMessage> getRadCakajucich() {
+        return ((ManagerAmbulancii) myManager()).getRadCakajucich();
+    }
 
 	@Override
 	public void prepareReplication()
@@ -87,5 +92,9 @@ public class AgentAmbulancii extends OSPABA.Agent
         if (ambulancia != null) {
             ambulancia.setJeObsadena(false);
         }
+    }
+
+    public List<Ambulancia> getAmbulancies() {
+        return ambulancie;
     }
 }

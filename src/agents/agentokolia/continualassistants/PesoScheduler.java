@@ -44,8 +44,7 @@ public class PesoScheduler extends OSPABA.Scheduler
 
             msg.setPacient(pacient);
 
-            System.out.println("Vznikol PESO pacient id=" + pacient.id()
-                    + " v case " + mySim().currentTime());
+            ((MySimulation) mySim()).log("Vznikol PESO pacient id=" + pacient.id());
 
             assistantFinished(msg);
 

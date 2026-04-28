@@ -18,6 +18,10 @@ public class AgentSestier extends OSPABA.Agent
 		init();
 	}
 
+    public List<MyMessage> getRadCakajucich() {
+        return ((ManagerSestier) myManager()).getRadCakajucich();
+    }
+
 	@Override
 	public void prepareReplication()
 	{
@@ -69,6 +73,10 @@ public class AgentSestier extends OSPABA.Agent
         }
 
         return null;
+    }
+
+    public List<Sestra> getSestry() {
+        return sestry;
     }
 
     public void uvolniSestru(Sestra sestra)

@@ -33,17 +33,19 @@ public class PresunDoAmbulancie extends OSPABA.Process
 
         if (message.lastPost() == MessageForm.PostType.start) {
             double casLekar = msg.getAmbulancia().equals(msg.getLekar().getPoloha())
-                    ? 0
-                    : generator.nextValue();
-
+                    ? 0 : generator.nextValue();
             double casSestra = msg.getAmbulancia().equals(msg.getSestra().getPoloha())
-                    ? 0
-                    : generator.nextValue();
+                    ? 0 : generator.nextValue();
             double delay = Math.max(casSestra, casLekar);
             if (delay > 0) {
+                ((MySimulation) mySim()).log("Personál presun ku ambulancii " + msg.getAmbulancia().id()
+                        + " (lekár id=" + msg.getLekar().id() + " " + String.format("%.0f", casLekar) + "s"
+                        + ", sestra id=" + msg.getSestra().id() + " " + String.format("%.0f", casSestra) + "s)");
                 hold(delay, message);
-            }
-            else {
+            } else {
+                ((MySimulation) mySim()).log("Personál (lekár id=" + msg.getLekar().id()
+                        + ", sestra id=" + msg.getSestra().id()
+                        + ") už pri ambulancii " + msg.getAmbulancia().id());
                 msg.getSestra().setPoloha(msg.getAmbulancia());
                 msg.getLekar().setPoloha(msg.getAmbulancia());
                 assistantFinished(message);

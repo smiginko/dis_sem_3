@@ -34,11 +34,16 @@ public class PresunNaVstupnuKontrolu extends OSPABA.Process
             double casPresunu = vypocitajCasPresunuSestry(msg);
 
             if (casPresunu <= 0.0) {
+                ((MySimulation) mySim()).log("Sestra id=" + msg.getSestra().id()
+                        + " už pri ambulancii " + msg.getAmbulancia().id());
                 msg.getSestra().setPoloha(msg.getAmbulancia());
                 assistantFinished(message);
                 return;
             }
 
+            ((MySimulation) mySim()).log("Sestra id=" + msg.getSestra().id()
+                    + " presun ku ambulancii " + msg.getAmbulancia().id()
+                    + ": " + String.format("%.0f", casPresunu) + "s");
             hold(casPresunu, message);
             return;
         }

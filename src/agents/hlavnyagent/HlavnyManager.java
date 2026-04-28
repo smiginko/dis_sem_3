@@ -54,7 +54,9 @@ public class HlavnyManager extends OSPABA.Manager
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public void init()
 	{
-	}
+        MyMessage dummy = new MyMessage(mySim());
+        dummy.setCode(Mc.start);
+    }
 
 	@Override
 	public void processMessage(MessageForm message)

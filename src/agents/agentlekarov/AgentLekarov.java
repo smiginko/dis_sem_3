@@ -19,6 +19,10 @@ public class AgentLekarov extends OSPABA.Agent
 		init();
 	}
 
+    public List<MyMessage> getRadCakajucich() {
+        return ((ManagerLekarov) myManager()).getRadCakajucich();
+    }
+
 	@Override
 	public void prepareReplication()
 	{
@@ -69,6 +73,10 @@ public class AgentLekarov extends OSPABA.Agent
             }
         }
         return null;
+    }
+
+    public List<Lekar> getLekari() {
+        return lekari;
     }
 
     public void uvolniLekara(Lekar lekar)
