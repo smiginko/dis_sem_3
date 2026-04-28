@@ -1,6 +1,7 @@
 package agents.agenturgentu.continualassistants;
 
 import OSPABA.*;
+import generatory.ContinousGenerator;
 import simulation.*;
 import agents.agenturgentu.*;
 import OSPABA.Process;
@@ -8,6 +9,8 @@ import OSPABA.Process;
 //meta! id="114"
 public class PresunZCakarne extends OSPABA.Process
 {
+    private ContinousGenerator generator;
+
 	public PresunZCakarne(int id, Simulation mySim, CommonAgent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -18,11 +21,21 @@ public class PresunZCakarne extends OSPABA.Process
 	{
 		super.prepareReplication();
 		// Setup component for the next replication
+        MySimulation sim = (MySimulation) mySim();
+        generator = new ContinousGenerator(150, 240, sim.getSeedGenerator());
 	}
 
 	//meta! sender="AgentUrgentu", id="115", type="Start"
 	public void processStart(MessageForm message)
 	{
+        if (message.lastPost() == MessageForm.PostType.start) {
+            hold(generator.nextDouble(), message);
+            return;
+        }
+
+        if (message.lastPost() == MessageForm.PostType.hold) {
+            assistantFinished(message);
+        }
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"

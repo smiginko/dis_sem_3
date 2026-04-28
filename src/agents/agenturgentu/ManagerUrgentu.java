@@ -47,11 +47,12 @@ public class ManagerUrgentu extends OSPABA.Manager
 	{
         MyMessage msg = (MyMessage) message;
 
-        message.setCode(Mc.obsluhaPacienta);
-        response(message);
+        uvolniSestruPreMsg(msg);
+        uvolniLekaraPreMsg(msg);
+        uvolniAmbulanciuPreMsg(msg);
 
-        skusSpustitOsetrenie();
-        skusSpustitVstupneVysetrenie();
+        message.setAddressee(Id.presunZCakarne);
+        startContinualAssistant(message);
 	}
 
 	//meta! sender="AgentSestier", id="44", type="Response"
@@ -181,12 +182,6 @@ public class ManagerUrgentu extends OSPABA.Manager
                 + " typ="
                 + msg.getPacient().getTyp());
 
-        if (msg.getPacient().getTyp() == Pacient.TypPacienta.SANITKA) {
-            msg.getPacient().setPriorita(0);
-        } else {
-            msg.getPacient().setPriorita(10);
-        }
-
         msg.setFazaPacienta(MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE);
         msg.setPovolenaAmbulanciaA(false);
         msg.setPovolenaAmbulanciaB(true);
@@ -242,6 +237,13 @@ public class ManagerUrgentu extends OSPABA.Manager
 	//meta! sender="PresunZCakarne", id="115", type="Finish"
 	public void processFinishPresunZCakarne(MessageForm message)
 	{
+        MyMessage msg = (MyMessage) message;
+
+        System.out.println("[" + mySim().currentTime() + "] Pacient id="
+                + msg.getPacient().id() + " dokoncil odchod z urgentu");
+
+        message.setCode(Mc.obsluhaPacienta);
+        response(message);
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"

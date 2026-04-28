@@ -39,8 +39,15 @@ public class PresunDoAmbulancie extends OSPABA.Process
             double casSestra = msg.getAmbulancia().equals(msg.getSestra().getPoloha())
                     ? 0
                     : generator.nextValue();
-
-            hold(Math.max(casSestra, casLekar), message);
+            double delay = Math.max(casSestra, casLekar);
+            if (delay > 0) {
+                hold(delay, message);
+            }
+            else {
+                msg.getSestra().setPoloha(msg.getAmbulancia());
+                msg.getLekar().setPoloha(msg.getAmbulancia());
+                assistantFinished(message);
+            }
             return;
         }
 

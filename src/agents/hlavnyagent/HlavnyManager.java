@@ -29,8 +29,10 @@ public class HlavnyManager extends OSPABA.Manager
 	{
         MyMessage msg = (MyMessage) message;
 
-        System.out.println("HlavnyAgent: pacient vybaveny id="
-                + msg.getPacient().id());
+        MyMessage odchod = new MyMessage(msg);
+        odchod.setCode(Mc.odchodPacienta);
+        odchod.setAddressee(Id.agentOkolia);
+        notice(odchod);
 	}
 
 	//meta! sender="AgentOkolia", id="12", type="Notice"
