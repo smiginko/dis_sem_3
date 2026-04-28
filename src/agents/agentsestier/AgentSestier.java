@@ -1,10 +1,8 @@
 package agents.agentsestier;
 
 import OSPABA.*;
-import agents.agentsestier.instantassistants.*;
-import entity.Sestra;
 import simulation.*;
-
+import entity.Sestra;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +36,6 @@ public class AgentSestier extends OSPABA.Agent
 	private void init()
 	{
 		new ManagerSestier(Id.managerSestier, mySim(), this);
-		new VyberSestru(Id.vyberSestru, mySim(), this);
-		new UvolniSestru(Id.uvolniSestru, mySim(), this);
 		addOwnMessage(Mc.init);
 		addOwnMessage(Mc.pridelenieSestry);
 		addOwnMessage(Mc.uvolnenieSestry);

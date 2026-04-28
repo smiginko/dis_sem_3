@@ -62,16 +62,16 @@ public class ManagerAmbulancii extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
-		case Mc.uvolnenieAmbulancie:
-			processUvolnenieAmbulancie(message);
-		break;
-
 		case Mc.pridelenieAmbulancie:
 			processPridelenieAmbulancie(message);
 		break;
 
 		case Mc.init:
 			processInit(message);
+		break;
+
+		case Mc.uvolnenieAmbulancie:
+			processUvolnenieAmbulancie(message);
 		break;
 
 		default:

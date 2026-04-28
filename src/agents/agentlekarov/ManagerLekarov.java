@@ -62,16 +62,16 @@ public class ManagerLekarov extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
-		case Mc.pridelenieLekara:
-			processPridelenieLekara(message);
-		break;
-
 		case Mc.uvolnenieLekara:
 			processUvolnenieLekara(message);
 		break;
 
 		case Mc.init:
 			processInit(message);
+		break;
+
+		case Mc.pridelenieLekara:
+			processPridelenieLekara(message);
 		break;
 
 		default:

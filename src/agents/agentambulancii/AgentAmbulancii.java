@@ -1,10 +1,8 @@
 package agents.agentambulancii;
 
 import OSPABA.*;
-import entity.Ambulancia;
 import simulation.*;
-import agents.agentambulancii.instantassistants.*;
-
+import entity.Ambulancia;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,8 +39,6 @@ public class AgentAmbulancii extends OSPABA.Agent
 	private void init()
 	{
 		new ManagerAmbulancii(Id.managerAmbulancii, mySim(), this);
-		new VyberAmbulanciu(Id.vyberAmbulanciu, mySim(), this);
-		new UvolniAmbulanciu(Id.uvolniAmbulanciu, mySim(), this);
 		addOwnMessage(Mc.init);
 		addOwnMessage(Mc.pridelenieAmbulancie);
 		addOwnMessage(Mc.uvolnenieAmbulancie);

@@ -21,20 +21,14 @@ public class Id extends OSPABA.IdList
 	public static final int managerVstupnehoVysetrenia = 106;
 	public static final int managerOsetrenia = 107;
 	public static final int managerAmbulancii = 108;
-	public static final int vyberAmbulanciu = 1019;
 	public static final int vykonanieOsetrenia = 1006;
-	public static final int uvolniAmbulanciu = 1020;
 	public static final int pesoScheduler = 1001;
 	public static final int presunNaVstupnuKontrolu = 1007;
 	public static final int prideleniePriority = 1009;
 	public static final int presunDoCakarne = 1021;
 	public static final int presunDoAmbulancie = 1010;
-	public static final int vyberLekara = 1012;
 	public static final int presunZCakarne = 1022;
-	public static final int uvolniLekara = 1013;
 	public static final int zachrankaScheduler = 1003;
-	public static final int uvolniSestru = 1016;
 	public static final int vykonanieVysetrenia = 1004;
-	public static final int vyberSestru = 1018;
 	//meta! tag="end"
 }

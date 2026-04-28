@@ -62,16 +62,16 @@ public class ManagerSestier extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
-		case Mc.pridelenieSestry:
-			processPridelenieSestry(message);
+		case Mc.uvolnenieSestry:
+			processUvolnenieSestry(message);
 		break;
 
 		case Mc.init:
 			processInit(message);
 		break;
 
-		case Mc.uvolnenieSestry:
-			processUvolnenieSestry(message);
+		case Mc.pridelenieSestry:
+			processPridelenieSestry(message);
 		break;
 
 		default:

@@ -1,11 +1,9 @@
 package agents.agentlekarov;
 
 import OSPABA.*;
+import simulation.*;
 import entity.Lekar;
 import entity.Sestra;
-import simulation.*;
-import agents.agentlekarov.instantassistants.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,8 +37,6 @@ public class AgentLekarov extends OSPABA.Agent
 	private void init()
 	{
 		new ManagerLekarov(Id.managerLekarov, mySim(), this);
-		new VyberLekara(Id.vyberLekara, mySim(), this);
-		new UvolniLekara(Id.uvolniLekara, mySim(), this);
 		addOwnMessage(Mc.init);
 		addOwnMessage(Mc.pridelenieLekara);
 		addOwnMessage(Mc.uvolnenieLekara);
@@ -87,4 +83,3 @@ public class AgentLekarov extends OSPABA.Agent
         }
     }
 }
-
