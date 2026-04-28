@@ -221,7 +221,7 @@ public class ManagerUrgentu extends OSPABA.Manager
 	}
 
 	//meta! sender="PresunDoCakarne", id="108", type="Finish"
-	public void processFinish(MessageForm message)
+	public void processFinishPresunDoCakarne(MessageForm message)
 	{
         MyMessage msg = (MyMessage) message;
 
@@ -239,6 +239,11 @@ public class ManagerUrgentu extends OSPABA.Manager
         }
 	}
 
+	//meta! sender="PresunZCakarne", id="115", type="Finish"
+	public void processFinishPresunZCakarne(MessageForm message)
+	{
+	}
+
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public void init()
 	{
@@ -249,36 +254,45 @@ public class ManagerUrgentu extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
-		case Mc.pridelenieSestry:
-			processPridelenieSestry(message);
-		break;
-
-		case Mc.pridelenieLekara:
-			processPridelenieLekara(message);
+		case Mc.init:
+			processInit(message);
 		break;
 
 		case Mc.osetreniePacienta:
 			processOsetreniePacienta(message);
 		break;
 
+		case Mc.pridelenieAmbulancie:
+			processPridelenieAmbulancie(message);
+		break;
+
 		case Mc.finish:
-			processFinish(message);
+			switch (message.sender().id())
+			{
+			case Id.presunDoCakarne:
+				processFinishPresunDoCakarne(message);
+			break;
+
+			case Id.presunZCakarne:
+				processFinishPresunZCakarne(message);
+			break;
+			}
+		break;
+
+		case Mc.vstupneVysetreniePacienta:
+			processVstupneVysetreniePacienta(message);
+		break;
+
+		case Mc.pridelenieLekara:
+			processPridelenieLekara(message);
 		break;
 
 		case Mc.obsluhaPacienta:
 			processObsluhaPacienta(message);
 		break;
 
-		case Mc.pridelenieAmbulancie:
-			processPridelenieAmbulancie(message);
-		break;
-
-		case Mc.init:
-			processInit(message);
-		break;
-
-		case Mc.vstupneVysetreniePacienta:
-			processVstupneVysetreniePacienta(message);
+		case Mc.pridelenieSestry:
+			processPridelenieSestry(message);
 		break;
 
 		default:

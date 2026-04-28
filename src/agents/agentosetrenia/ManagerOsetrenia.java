@@ -54,7 +54,7 @@ public class ManagerOsetrenia extends OSPABA.Manager
         startContinualAssistant(message);
 	}
 
-	//meta! sender="OdchodPacienta", id="81", type="Finish"
+	//meta! userInfo="Removed from model"
 	public void processFinishOdchodPacienta(MessageForm message)
 	{
         message.setCode(Mc.osetreniePacienta);
@@ -82,16 +82,12 @@ public class ManagerOsetrenia extends OSPABA.Manager
 		case Mc.finish:
 			switch (message.sender().id())
 			{
-			case Id.presunDoAmbulancie:
-				processFinishPresunDoAmbulancie(message);
-			break;
-
 			case Id.vykonanieOsetrenia:
 				processFinishVykonanieOsetrenia(message);
 			break;
 
-			case Id.odchodPacienta:
-				processFinishOdchodPacienta(message);
+			case Id.presunDoAmbulancie:
+				processFinishPresunDoAmbulancie(message);
 			break;
 			}
 		break;

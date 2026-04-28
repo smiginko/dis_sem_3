@@ -24,7 +24,6 @@ public class AgentOsetrenia extends OSPABA.Agent
 	private void init()
 	{
 		new ManagerOsetrenia(Id.managerOsetrenia, mySim(), this);
-		new OdchodPacienta(Id.odchodPacienta, mySim(), this);
 		new PresunDoAmbulancie(Id.presunDoAmbulancie, mySim(), this);
 		new VykonanieOsetrenia(Id.vykonanieOsetrenia, mySim(), this);
 		addOwnMessage(Mc.init);
