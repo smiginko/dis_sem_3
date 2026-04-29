@@ -31,12 +31,14 @@ public class AgentAmbulancii extends OSPABA.Agent
 
         MySimulation sim = (MySimulation) mySim();
 
+        int layoutIndex = 0;
+
         for (int i = 0; i < sim.getPocetAmbulanciiA(); i++) {
-            ambulancie.add(new Ambulancia(mySim(), Ambulancia.TypeAmbulancia.TYP_A));
+            ambulancie.add(new Ambulancia(mySim(), Ambulancia.TypeAmbulancia.TYP_A, layoutIndex++));
         }
 
         for (int i = 0; i < sim.getPocetAmbulanciiB(); i++) {
-            ambulancie.add(new Ambulancia(mySim(), Ambulancia.TypeAmbulancia.TYP_B));
+            ambulancie.add(new Ambulancia(mySim(), Ambulancia.TypeAmbulancia.TYP_B, layoutIndex++));
         }
 	}
 

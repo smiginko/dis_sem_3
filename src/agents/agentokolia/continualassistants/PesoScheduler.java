@@ -42,6 +42,8 @@ public class PesoScheduler extends OSPABA.Scheduler
                     mySim().currentTime()
             );
 
+            ((MySimulation) mySim()).animaciaUrgentu().registrujPacientaNaVstupe(pacient);
+
             msg.setPacient(pacient);
 
             ((MySimulation) mySim()).log("Vznikol PESO pacient id=" + pacient.id());

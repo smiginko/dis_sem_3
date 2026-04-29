@@ -78,6 +78,9 @@ public class ManagerUrgentu extends OSPABA.Manager
 
         if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
 
+            ((MySimulation) mySim()).animaciaUrgentu()
+                    .presunPacientaDoAmbulancie(msg.getPacient(), msg.getAmbulancia(), 0.0);
+
             ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
                     + " ZAČÍNA ošetrenie amb=" + msg.getAmbulancia().id()
                     + " lekár=" + msg.getLekar().id()
@@ -153,6 +156,8 @@ public class ManagerUrgentu extends OSPABA.Manager
 
         uvolniSestruPreMsg(msg);
         uvolniAmbulanciuPreMsg(msg);
+
+        ((MySimulation)mySim()).animaciaUrgentu().presunPacientaDoCakarne(msg.getPacient(), 0.0);
 
         msg.setFazaPacienta(MyMessage.FazaPacienta.OSETRENIE);
         nastavPovoleneAmbulanciePreOsetrenie(msg);

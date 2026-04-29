@@ -29,14 +29,21 @@ public class PresunZCakarne extends OSPABA.Process
 	public void processStart(MessageForm message)
 	{
         MyMessage msg = (MyMessage) message;
+        MySimulation s = (MySimulation) mySim();
 
         if (message.lastPost() == MessageForm.PostType.start) {
             double cas = generator.nextDouble();
-            ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
+
+            s.animaciaUrgentu().odchodPacientaZAmbulancie(msg.getPacient(), cas);
+
+            s.log("Pacient id=" + msg.getPacient().id()
                     + " odchod z urgentu: " + String.format("%.0f", cas) + "s");
+
             hold(cas, message);
             return;
         }
+
+        s.animaciaUrgentu().zmazPacienta(msg.getPacient());
 
         if (message.lastPost() == MessageForm.PostType.hold) {
             assistantFinished(message);

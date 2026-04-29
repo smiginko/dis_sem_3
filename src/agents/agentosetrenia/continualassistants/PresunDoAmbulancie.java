@@ -30,20 +30,26 @@ public class PresunDoAmbulancie extends OSPABA.Process
 	public void processStart(MessageForm message)
 	{
         MyMessage msg = (MyMessage) message;
+        MySimulation s = (MySimulation) mySim();
 
         if (message.lastPost() == MessageForm.PostType.start) {
             double casLekar = msg.getAmbulancia().equals(msg.getLekar().getPoloha())
                     ? 0 : generator.nextValue();
             double casSestra = msg.getAmbulancia().equals(msg.getSestra().getPoloha())
                     ? 0 : generator.nextValue();
+
             double delay = Math.max(casSestra, casLekar);
+
+            s.animaciaUrgentu().presunSestruDoAmbulancie(msg.getSestra(), msg.getAmbulancia(), casSestra);
+            s.animaciaUrgentu().presunLekaraDoAmbulancie(msg.getLekar(), msg.getAmbulancia(), casLekar);
+
             if (delay > 0) {
-                ((MySimulation) mySim()).log("Personál presun ku ambulancii " + msg.getAmbulancia().id()
+                s.log("Personál presun ku ambulancii " + msg.getAmbulancia().id()
                         + " (lekár id=" + msg.getLekar().id() + " " + String.format("%.0f", casLekar) + "s"
                         + ", sestra id=" + msg.getSestra().id() + " " + String.format("%.0f", casSestra) + "s)");
                 hold(delay, message);
             } else {
-                ((MySimulation) mySim()).log("Personál (lekár id=" + msg.getLekar().id()
+                s.log("Personál (lekár id=" + msg.getLekar().id()
                         + ", sestra id=" + msg.getSestra().id()
                         + ") už pri ambulancii " + msg.getAmbulancia().id());
                 msg.getSestra().setPoloha(msg.getAmbulancia());

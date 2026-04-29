@@ -3,6 +3,7 @@ package agents.agentokolia.continualassistants;
 import OSPABA.*;
 import agents.agentokolia.*;
 import entity.Pacient;
+import generatory.ErlangDistribution;
 import generatory.ExponentialDistribution;
 import simulation.*;
 
@@ -10,7 +11,7 @@ import simulation.*;
 public class ZachrankaScheduler extends OSPABA.Scheduler
 {
 
-    private ExponentialDistribution generator;
+    private ErlangDistribution generator;
 
 	public ZachrankaScheduler(int id, Simulation mySim, CommonAgent myAgent)
 	{
@@ -23,7 +24,7 @@ public class ZachrankaScheduler extends OSPABA.Scheduler
 		super.prepareReplication();
 		// Setup component for the next replication
         MySimulation mySimulation = (MySimulation) mySim();
-        this.generator = new ExponentialDistribution(mySimulation.getSeedGenerator(), 129.14);
+        this.generator = new ErlangDistribution(mySimulation.getSeedGenerator(),7, 351.1);
 	}
 
 	//meta! sender="AgentOkolia", id="59", type="Start"
@@ -42,6 +43,8 @@ public class ZachrankaScheduler extends OSPABA.Scheduler
                     Pacient.TypPacienta.SANITKA,
                     mySim().currentTime()
             );
+
+            ((MySimulation) mySim()).animaciaUrgentu().registrujPacientaNaVstupe(pacient);
 
             msg.setPacient(pacient);
 

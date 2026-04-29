@@ -9,11 +9,13 @@ import agents.hlavnyagent.*;
 import agents.agentvstupnehovysetrenia.*;
 import agents.agenturgentu.*;
 import agents.agentambulancii.*;
+import simulation.animacia.AnimaciaUrgentu;
 
 import java.util.Random;
 
 public class MySimulation extends OSPABA.Simulation
 {
+    private AnimaciaUrgentu animaciaUrgentu;
     private StrategiaPridelovania strategiaPridelovania = StrategiaPridelovania.PRVA_VOLNA;
 
     // 1.0 = 1x reálny čas, 0.1 = 10x, null = turbo
@@ -32,6 +34,7 @@ public class MySimulation extends OSPABA.Simulation
 	public MySimulation()
 	{
 		init();
+        this.animaciaUrgentu = new AnimaciaUrgentu(this);
 	}
 
 	@Override
@@ -46,6 +49,7 @@ public class MySimulation extends OSPABA.Simulation
 	public void prepareReplication()
 	{
 		super.prepareReplication();
+        animaciaUrgentu.prepareReplication();
         logs.clear();
 
         if (desiredSpeedDuration != null) {
@@ -213,6 +217,10 @@ public AgentLekarov agentLekarov()
         java.util.List<String> copy = new java.util.ArrayList<>(logs);
         logs.clear();
         return copy;
+    }
+
+    public AnimaciaUrgentu animaciaUrgentu() {
+        return animaciaUrgentu;
     }
 
     private String formatCas(double totalSeconds) {

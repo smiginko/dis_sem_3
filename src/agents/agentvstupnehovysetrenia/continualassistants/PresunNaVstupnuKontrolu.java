@@ -33,6 +33,12 @@ public class PresunNaVstupnuKontrolu extends OSPABA.Process
         if (message.lastPost() == MessageForm.PostType.start) {
             double casPresunu = vypocitajCasPresunuSestry(msg);
 
+            ((MySimulation) mySim()).animaciaUrgentu()
+                    .presunPacientaDoAmbulancie(msg.getPacient(), msg.getAmbulancia(), casPresunu);
+
+            ((MySimulation) mySim()).animaciaUrgentu()
+                    .presunSestruDoAmbulancie(msg.getSestra(), msg.getAmbulancia(), casPresunu);
+
             if (casPresunu <= 0.0) {
                 ((MySimulation) mySim()).log("Sestra id=" + msg.getSestra().id()
                         + " už pri ambulancii " + msg.getAmbulancia().id());

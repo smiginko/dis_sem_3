@@ -37,11 +37,15 @@ public class PresunDoCakarne extends OSPABA.Process
         MyMessage msg = (MyMessage) message;
 
         if (message.lastPost() == MessageForm.PostType.start) {
-            double cas = vygenerujCasPresunu(msg);
+            double casPresunu = vygenerujCasPresunu(msg);
+
+            ((MySimulation) mySim()).animaciaUrgentu()
+                    .presunPacientaDoCakarne(msg.getPacient(), casPresunu);
+
             ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
                     + " typ=" + msg.getPacient().getTyp()
-                    + " presun do čakárne: " + String.format("%.0f", cas) + "s");
-            hold(cas, message);
+                    + " presun do čakárne: " + String.format("%.0f", casPresunu) + "s");
+            hold(casPresunu, message);
             return;
         }
 

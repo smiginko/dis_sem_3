@@ -11,6 +11,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class MainGui extends JFrame implements ISimDelegate {
+    private JPanel animaciaContainer;
+
     private MySimulation sim;
 
     private JLabel timeLabel;
@@ -186,12 +188,10 @@ public class MainGui extends JFrame implements ISimDelegate {
     }
 
     private JPanel buildAnimaciaTab() {
-        JPanel panel = new JPanel(new BorderLayout());
-        JLabel placeholder = new JLabel("Animácia bude implementovaná neskôr.", SwingConstants.CENTER);
-        placeholder.setFont(new Font("SansSerif", Font.ITALIC, 16));
-        placeholder.setForeground(Color.GRAY);
-        panel.add(placeholder, BorderLayout.CENTER);
-        return panel;
+        animaciaContainer = new JPanel(new BorderLayout());
+        animaciaContainer.add(new JLabel("Animácia sa vytvorí po štarte simulácie.", SwingConstants.CENTER),
+                BorderLayout.CENTER);
+        return animaciaContainer;
     }
 
     private JPanel createTableWrapper(JTable table, String title, String... cols) {
@@ -260,6 +260,8 @@ public class MainGui extends JFrame implements ISimDelegate {
         sim.setPocetSestier((int) sestrySpinner.getValue());
         sim.setPocetLekarov((int) lekariSpinner.getValue());
         sim.setStrategiaPridelovania((StrategiaPridelovania) strategiaBox.getSelectedItem());
+
+        pripravAnimaciuPreSimulaciu();
 
         if (turboRequested) {
             sim.setTurboDesired();
@@ -335,5 +337,21 @@ public class MainGui extends JFrame implements ISimDelegate {
 
     private double selectedDuration() {
         return 1.0 / SPEED_MULTIPLIERS[selectedSpeedIndex];
+    }
+
+    private void pripravAnimaciuPreSimulaciu() {
+        animaciaContainer.removeAll();
+
+        if (turboRequested) {
+            animaciaContainer.add(new JLabel("Animácia je vypnutá v TURBO režime.", SwingConstants.CENTER),
+                    BorderLayout.CENTER);
+        } else {
+            sim.createAnimator();
+            sim.animator().setSynchronizedTime(true);
+            animaciaContainer.add(sim.animator().canvas(), BorderLayout.CENTER);
+        }
+
+        animaciaContainer.revalidate();
+        animaciaContainer.repaint();
     }
 }
