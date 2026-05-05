@@ -3,10 +3,15 @@ package gui;
 import OSPABA.ISimDelegate;
 import OSPABA.SimState;
 import OSPABA.Simulation;
+import agents.agentambulancii.AgentAmbulancii;
 import agents.agentambulancii.ManagerAmbulancii;
+import agents.agentlekarov.AgentLekarov;
 import agents.agentlekarov.ManagerLekarov;
+import agents.agentokolia.AgentOkolia;
 import agents.agentokolia.ManagerOkolia;
+import agents.agentsestier.AgentSestier;
 import agents.agentsestier.ManagerSestier;
+import agents.agenturgentu.AgentUrgentu;
 import agents.agenturgentu.ManagerUrgentu;
 import simulation.MySimulation;
 import statistiky.Statistic;
@@ -60,35 +65,35 @@ public class StatistikyObserver implements ISimDelegate {
     }
 
     private String vytvorLokalneStatistikyText(MySimulation s) {
-        ManagerOkolia managerOkolia = (ManagerOkolia) s.agentOkolia().myManager();
-        ManagerUrgentu managerUrgentu = (ManagerUrgentu) s.agentUrgentu().myManager();
-        ManagerAmbulancii managerAmbulancii = (ManagerAmbulancii) s.agentAmbulancii().myManager();
-        ManagerSestier managerSestier = (ManagerSestier) s.agentSestier().myManager();
-        ManagerLekarov managerLekarov = (ManagerLekarov) s.agentLekarov().myManager();
+        AgentUrgentu urgent = s.agentUrgentu();
+        AgentOkolia okolie = s.agentOkolia();
+        AgentAmbulancii ambulancie = s.agentAmbulancii();
+        AgentSestier sestry = s.agentSestier();
+        AgentLekarov lekari = s.agentLekarov();
         double t = s.currentTime();
 
         StringBuilder sb = new StringBuilder();
         sb.append("  CAKACIE DOBY\n");
-        sb.append(radokStat("  Vstupne vysetrenie - PESO", managerUrgentu.getCasVCakarniVstupnePesoStat(), StatFormat.SECONDS));
-        sb.append(radokStat("  Vstupne vysetrenie - SANITKA", managerUrgentu.getCasVCakarniVstupneSanitkaStat(), StatFormat.SECONDS));
+        sb.append(radokStat("  Vstupne vysetrenie - PESO", urgent.getCasVCakarniVstupnePesoStat(), StatFormat.SECONDS));
+        sb.append(radokStat("  Vstupne vysetrenie - SANITKA", urgent.getCasVCakarniVstupneSanitkaStat(), StatFormat.SECONDS));
 
         for (int p = 1; p <= 5; p++) {
             sb.append(radokStat("  Osetrenie - priorita " + p,
-                    managerUrgentu.getCasVCakarniOsetreniePriorita(p),
+                    urgent.getCasVCakarniOsetreniePriorita(p),
                     StatFormat.SECONDS));
         }
 
-        sb.append(radokStat("  Celkovy cas v systeme", managerOkolia.getCelkovyCasVSystemeStat(), StatFormat.SECONDS));
+        sb.append(radokStat("  Celkovy cas v systeme", okolie.getCelkovyCasVSystemeStat(), StatFormat.SECONDS));
 
         sb.append("\n  RADY\n");
-        sb.append(radokTW("  Vstupne vysetrenie (priem. dlzka)", managerUrgentu.getDlzkaRaduVstupne(), t, StatFormat.NUMBER));
-        sb.append(radokTW("  Osetrenie (priem. dlzka)", managerUrgentu.getDlzkaRaduOsetrenie(), t, StatFormat.NUMBER));
+        sb.append(radokTW("  Vstupne vysetrenie (priem. dlzka)", urgent.getDlzkaRaduVstupne(), t, StatFormat.NUMBER));
+        sb.append(radokTW("  Osetrenie (priem. dlzka)", urgent.getDlzkaRaduOsetrenie(), t, StatFormat.NUMBER));
 
         sb.append("\n  VYTAZENIE ZDROJOV\n");
-        sb.append(radokTW("  Lekari", managerLekarov.getVytazenieLekarovStat(), t, StatFormat.PERCENT));
-        sb.append(radokTW("  Sestry", managerSestier.getVytazenieSestryStat(), t, StatFormat.PERCENT));
-        sb.append(radokTW("  Ambulancie A", managerAmbulancii.getVytazenieAmbulanciiA(), t, StatFormat.PERCENT));
-        sb.append(radokTW("  Ambulancie B", managerAmbulancii.getVytazenieAmbulanciiB(), t, StatFormat.PERCENT));
+        sb.append(radokTW("  Lekari", lekari.getVytazenieLekarovStat(), t, StatFormat.PERCENT));
+        sb.append(radokTW("  Sestry", sestry.getVytazenieSestryStat(), t, StatFormat.PERCENT));
+        sb.append(radokTW("  Ambulancie A", ambulancie.getVytazenieAmbulanciiA(), t, StatFormat.PERCENT));
+        sb.append(radokTW("  Ambulancie B", ambulancie.getVytazenieAmbulanciiB(), t, StatFormat.PERCENT));
 
         return sb.toString();
     }

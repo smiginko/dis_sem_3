@@ -113,30 +113,30 @@ public class MySimulation extends OSPABA.Simulation
 	{
 		// Collect local statistics into global, update UI, etc...
 
-        ManagerOkolia managerOkolia = (ManagerOkolia) agentOkolia().myManager();
-        ManagerUrgentu managerUrgentu = (ManagerUrgentu) agentUrgentu().myManager();
-        ManagerAmbulancii managerAmbulancii = (ManagerAmbulancii) agentAmbulancii().myManager();
-        ManagerSestier managerSestier = (ManagerSestier) agentSestier().myManager();
-        ManagerLekarov managerLekarov = (ManagerLekarov) agentLekarov().myManager();
+        AgentOkolia okolie = agentOkolia();
+        AgentUrgentu urgent = agentUrgentu();
+        AgentAmbulancii ambulancie = agentAmbulancii();
+        AgentSestier sestry = agentSestier();
+        AgentLekarov lekari = agentLekarov();
 
-        if (managerOkolia.getCelkovyCasVSystemeStat().getCount() > 0) {
-            globCelkovyCasVSysteme.addValue(managerOkolia.getCelkovyCasVSystemeStat().getAverage());
+        if (okolie.getCelkovyCasVSystemeStat().getCount() > 0) {
+            globCelkovyCasVSysteme.addValue(okolie.getCelkovyCasVSystemeStat().getAverage());
         }
 
-        if (managerUrgentu.getCasVCakarniVstupnePesoStat().getCount() > 0) {
+        if (urgent.getCasVCakarniVstupnePesoStat().getCount() > 0) {
             globCasVCakarniVstupnePeso.addValue(
-                    managerUrgentu.getCasVCakarniVstupnePesoStat().getAverage()
+                    urgent.getCasVCakarniVstupnePesoStat().getAverage()
             );
         }
 
-        if (managerUrgentu.getCasVCakarniVstupneSanitkaStat().getCount() > 0) {
+        if (urgent.getCasVCakarniVstupneSanitkaStat().getCount() > 0) {
             globCasVCakarniVstupneSanitka.addValue(
-                    managerUrgentu.getCasVCakarniVstupneSanitkaStat().getAverage()
+                    urgent.getCasVCakarniVstupneSanitkaStat().getAverage()
             );
         }
 
         for (int priorita = 1; priorita <= 5; priorita++) {
-            Statistic lokalna = managerUrgentu.getCasVCakarniOsetreniePriorita(priorita);
+            Statistic lokalna = urgent.getCasVCakarniOsetreniePriorita(priorita);
 
             if (lokalna.getCount() > 0) {
                 globCasVCakarniOsetreniePriorita[priorita].addValue(lokalna.getAverage());
@@ -144,27 +144,27 @@ public class MySimulation extends OSPABA.Simulation
         }
 
         globDlzkaRaduVstupne.addValue(
-                managerUrgentu.getDlzkaRaduVstupne().getAverage(currentTime())
+                urgent.getDlzkaRaduVstupne().getAverage(currentTime())
         );
 
         globDlzkaRaduOsetrenie.addValue(
-                managerUrgentu.getDlzkaRaduOsetrenie().getAverage(currentTime())
+                urgent.getDlzkaRaduOsetrenie().getAverage(currentTime())
         );
 
         globVytazenieAmbulanciiA.addValue(
-                managerAmbulancii.getVytazenieAmbulanciiA().getAverage(currentTime())
+                ambulancie.getVytazenieAmbulanciiA().getAverage(currentTime())
         );
 
         globVytazenieAmbulanciiB.addValue(
-                managerAmbulancii.getVytazenieAmbulanciiB().getAverage(currentTime())
+                ambulancie.getVytazenieAmbulanciiB().getAverage(currentTime())
         );
 
         globVytazenieSestier.addValue(
-                managerSestier.getVytazenieSestryStat().getAverage(currentTime())
+                sestry.getVytazenieSestryStat().getAverage(currentTime())
         );
 
         globVytazenieLekarov.addValue(
-                managerLekarov.getVytazenieLekarovStat().getAverage(currentTime())
+                lekari.getVytazenieLekarovStat().getAverage(currentTime())
         );
 
         super.replicationFinished();
@@ -307,7 +307,7 @@ public AgentLekarov agentLekarov()
 
     public void log(String message) {
         if (isMaxSpeed()) return;
-        String formatted = String.format("[%s] %s", formatCas(currentTime()), message);
+        String formatted = String.format("[%s] %s", formatCas(currentTime() - warmupTime), message);
         logs.add(formatted);
     }
 
@@ -335,6 +335,10 @@ public AgentLekarov agentLekarov()
     public double getWarmupTime()             { return warmupTime; }
     public void setWarmupTime(double t)       { this.warmupTime = t; }
     public Double getDesiredSpeedDuration()   { return desiredSpeedDuration; }
+
+    private volatile boolean warmupJustEnded = false;
+    public void signalWarmupEnded()          { warmupJustEnded = true; }
+    public boolean pollWarmupJustEnded() { boolean v = warmupJustEnded; warmupJustEnded = false; return v; }
 
     private String formatCas(double totalSeconds) {
         if (Double.isNaN(totalSeconds) || totalSeconds < 0) return "00:00:00";

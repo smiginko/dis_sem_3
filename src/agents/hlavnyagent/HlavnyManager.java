@@ -73,6 +73,7 @@ public class HlavnyManager extends OSPABA.Manager
             notice(o);
 
             MySimulation s = (MySimulation) mySim();
+            s.signalWarmupEnded();
             Double desired = s.getDesiredSpeedDuration();
             if (desired != null) {
                 s.setSimSpeed(1.0, desired);

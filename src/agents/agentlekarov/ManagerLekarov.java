@@ -3,7 +3,6 @@ package agents.agentlekarov;
 import OSPABA.*;
 import entity.Lekar;
 import simulation.*;
-import statistiky.TimeWeightedStatistic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +12,6 @@ import java.util.PriorityQueue;
 public class ManagerLekarov extends OSPABA.Manager
 {
     PriorityQueue<MyMessage> radCakajucich;
-
-    TimeWeightedStatistic vytazenieLekarovStat;
 
     public List<MyMessage> getRadCakajucich() {
         return new ArrayList<>(radCakajucich);
@@ -37,9 +34,6 @@ public class ManagerLekarov extends OSPABA.Manager
 			petriNet().clear();
 		}
         this.radCakajucich = new PriorityQueue<>(MyMessage.PORADIE);
-
-        vytazenieLekarovStat = new TimeWeightedStatistic("Vytazenie lekarov",
-                mySim().currentTime(), 0);
 	}
 
 	//meta! sender="AgentUrgentu", id="49", type="Notice"
@@ -56,9 +50,11 @@ public class ManagerLekarov extends OSPABA.Manager
 
         if (volnyLekar != null) {
             msg.setLekar(volnyLekar);
-            vytazenieLekarovStat.update((double) myAgent().getPocetObsadenychLekarov() / ((MySimulation) mySim()).getPocetLekarov(),
-                    mySim().currentTime());
+
+            myAgent().aktualizujVytazenieLekarov();
+
             response(msg);
+
         } else {
             ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
                     + " čaká na lekára");
@@ -73,8 +69,7 @@ public class ManagerLekarov extends OSPABA.Manager
 
         myAgent().uvolniLekara(msg.getLekar());
 
-        vytazenieLekarovStat.update((double) myAgent().getPocetObsadenychLekarov() / ((MySimulation) mySim()).getPocetLekarov(),
-                mySim().currentTime());
+        myAgent().aktualizujVytazenieLekarov();
 
         skusPridatLekaraDalsiemu();
 	}
@@ -90,9 +85,7 @@ public class ManagerLekarov extends OSPABA.Manager
 	//meta! sender="AgentUrgentu", id="144", type="Notice"
 	public void processKoniecZahrievania(MessageForm message)
 	{
-        double now = mySim().currentTime();
-
-        vytazenieLekarovStat.reset(now, 0);
+        myAgent().resetStatistikyPoZahrievani();
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"
@@ -142,14 +135,9 @@ public class ManagerLekarov extends OSPABA.Manager
             if (volnyLekar != null) {
                 cakajucaSprava = radCakajucich.poll();
                 cakajucaSprava.setLekar(volnyLekar);
-                vytazenieLekarovStat.update((double) myAgent().getPocetObsadenychLekarov() / ((MySimulation) mySim()).getPocetLekarov(),
-                        mySim().currentTime());
+                myAgent().aktualizujVytazenieLekarov();
                 response(cakajucaSprava);
             }
         }
-    }
-
-    public TimeWeightedStatistic getVytazenieLekarovStat() {
-        return vytazenieLekarovStat;
     }
 }

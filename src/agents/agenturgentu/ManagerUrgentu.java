@@ -6,8 +6,6 @@ import entity.Lekar;
 import entity.Pacient;
 import entity.Sestra;
 import simulation.*;
-import statistiky.Statistic;
-import statistiky.TimeWeightedStatistic;
 
 import java.util.*;
 
@@ -17,16 +15,6 @@ public class ManagerUrgentu extends OSPABA.Manager
 
     private PriorityQueue<MyMessage> radNaVstupneVysetrenie;
     private PriorityQueue<MyMessage> radNaOsetrenie;
-
-    private TimeWeightedStatistic dlzkaRaduVstupne;
-    private TimeWeightedStatistic dlzkaRaduOsetrenie;
-
-    private int pocetCakajucichNaVstupne;
-    private int pocetCakajucichNaOsetrenie;
-
-    private Statistic casVCakarniVstupnePesoStat;
-    private Statistic casVCakarniVstupneSanitkaStat;
-    private Statistic[] casVCakarniOsetreniePrioritaStat;
 
     private int pocetPacientovVSysteme = 0;
 
@@ -50,30 +38,7 @@ public class ManagerUrgentu extends OSPABA.Manager
         radNaVstupneVysetrenie = new PriorityQueue<>(MyMessage.PORADIE);
         radNaOsetrenie = new PriorityQueue<>(MyMessage.PORADIE);
 
-        pocetCakajucichNaVstupne = 0;
-        pocetCakajucichNaOsetrenie = 0;
         pocetPacientovVSysteme = 0;
-
-        dlzkaRaduVstupne = new TimeWeightedStatistic(
-                "Priemerna dlzka radu na vstupne vysetrenie",
-                mySim().currentTime(),
-                0
-        );
-
-        dlzkaRaduOsetrenie = new TimeWeightedStatistic(
-                "Priemerna dlzka radu na osetrenie",
-                mySim().currentTime(),
-                0
-        );
-
-        casVCakarniVstupnePesoStat = new Statistic("Cas cakania na vstupne vysetrenie - PESO");
-        casVCakarniVstupneSanitkaStat = new Statistic("Cas cakania na vstupne vysetrenie - SANITKA");
-
-        casVCakarniOsetreniePrioritaStat = new Statistic[6];
-        for (int priorita = 1; priorita <= 5; priorita++) {
-            casVCakarniOsetreniePrioritaStat[priorita] =
-                    new Statistic("Cas cakania na osetrenie - priorita " + priorita);
-        }
 
         if (((MySimulation) mySim()).isCollectAnalysisData()) {
             MyMessage msg = new MyMessage(mySim());
@@ -116,8 +81,8 @@ public class ManagerUrgentu extends OSPABA.Manager
                     + " ZAČÍNA vstupné vyšetrenie amb=" + msg.getAmbulancia().id()
                     + " sestra=" + msg.getSestra().id());
 
-            zapisCakanieNaVstupneVysetrenie(msg);
-            prestalCakatNaVstupne();
+            myAgent().zapisCakanieNaVstupneVysetrenie(msg);
+            myAgent().prestalCakatNaVstupne();
 
             message.setCode(Mc.vstupneVysetreniePacienta);
             message.setAddressee(Id.agentVstupnehoVysetrenia);
@@ -132,8 +97,8 @@ public class ManagerUrgentu extends OSPABA.Manager
                     + " sestra=" + msg.getSestra().id()
                     + " priorita=" + msg.getPacient().getPriorita());
 
-            zapisCakanieNaOsetrenie(msg);
-            prestalCakatNaOsetrenie();
+            myAgent().zapisCakanieNaOsetrenie(msg);
+            myAgent().prestalCakatNaOsetrenie();
 
             message.setCode(Mc.osetreniePacienta);
             message.setAddressee(Id.agentOsetrenia);
@@ -212,7 +177,7 @@ public class ManagerUrgentu extends OSPABA.Manager
         msg.setFazaPacienta(MyMessage.FazaPacienta.OSETRENIE);
         nastavPovoleneAmbulanciePreOsetrenie(msg);
 
-        zacalCakatNaOsetrenie();
+        myAgent().zacalCakatNaOsetrenie();
         vlozDoRaduOsetrenie(msg);
         ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
                 + " vstúpil do frontu na ošetrenie (priorita " + msg.getPacient().getPriorita() + ")");
@@ -236,7 +201,7 @@ public class ManagerUrgentu extends OSPABA.Manager
 
         switch (message.sender().id()) {
             case Id.presunDoCakarne:
-                zacalCakatNaVstupne();
+                myAgent().zacalCakatNaVstupne();
                 vlozDoRaduVstupne(msg);
                 ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id() + " prišiel do čakárne");
                 skusSpustitVstupneVysetrenie();
@@ -264,12 +229,7 @@ public class ManagerUrgentu extends OSPABA.Manager
 	//meta! sender="HlavnyAgent", id="140", type="Notice"
 	public void processKoniecZahrievania(MessageForm message)
 	{
-        double now = mySim().currentTime();
-        dlzkaRaduVstupne.reset(now, 0);
-        dlzkaRaduOsetrenie.reset(now, 0);
-        casVCakarniVstupnePesoStat.reset();
-        casVCakarniVstupneSanitkaStat.reset();
-        for (int i = 1; i <= 5; i++) casVCakarniOsetreniePrioritaStat[i].reset();
+        myAgent().resetStatistikyPoZahrievani();
 
         for (int agentId : new int[]{Id.agentSestier, Id.agentLekarov, Id.agentAmbulancii}) {
             MyMessage m = new MyMessage(mySim());
@@ -495,81 +455,5 @@ public class ManagerUrgentu extends OSPABA.Manager
         List<MyMessage> sorted = new ArrayList<>(radNaOsetrenie);
         sorted.sort(MyMessage.PORADIE);
         return sorted;
-    }
-
-    //Statistiky-------
-    private void zapisCakanieNaVstupneVysetrenie(MyMessage msg) {
-        double cakanie = mySim().currentTime() - msg.getCasVstupuDoAktualnehoRadu();
-
-        switch (msg.getPacient().getTyp()) {
-            case PESO:
-                casVCakarniVstupnePesoStat.addValue(cakanie);
-                break;
-            case SANITKA:
-                casVCakarniVstupneSanitkaStat.addValue(cakanie);
-                break;
-            default:
-                throw new IllegalStateException("Neznamy typ pacienta: " + msg.getPacient().getTyp());
-        }
-    }
-
-    private void zapisCakanieNaOsetrenie(MyMessage msg) {
-        int priorita = msg.getPacient().getPriorita();
-
-        if (priorita < 1 || priorita > 5) {
-            throw new IllegalStateException("Neplatna priorita pacienta: " + priorita);
-        }
-
-        double cakanie = mySim().currentTime() - msg.getCasVstupuDoAktualnehoRadu();
-        casVCakarniOsetreniePrioritaStat[priorita].addValue(cakanie);
-    }
-
-    private void zacalCakatNaVstupne() {
-        pocetCakajucichNaVstupne++;
-        dlzkaRaduVstupne.update(pocetCakajucichNaVstupne, mySim().currentTime());
-    }
-
-    private void prestalCakatNaVstupne() {
-        if (pocetCakajucichNaVstupne <= 0) {
-            throw new IllegalStateException("Pocet cakajucich na vstupne nemoze byt zaporny");
-        }
-
-        pocetCakajucichNaVstupne--;
-        dlzkaRaduVstupne.update(pocetCakajucichNaVstupne, mySim().currentTime());
-    }
-
-    private void zacalCakatNaOsetrenie() {
-        pocetCakajucichNaOsetrenie++;
-        dlzkaRaduOsetrenie.update(pocetCakajucichNaOsetrenie, mySim().currentTime());
-    }
-
-    private void prestalCakatNaOsetrenie() {
-        if (pocetCakajucichNaOsetrenie <= 0) {
-            throw new IllegalStateException("Pocet cakajucich na osetrenie nemoze byt zaporny");
-        }
-
-        pocetCakajucichNaOsetrenie--;
-        dlzkaRaduOsetrenie.update(pocetCakajucichNaOsetrenie, mySim().currentTime());
-    }
-
-
-    public TimeWeightedStatistic getDlzkaRaduVstupne() {
-        return dlzkaRaduVstupne;
-    }
-
-    public TimeWeightedStatistic getDlzkaRaduOsetrenie() {
-        return dlzkaRaduOsetrenie;
-    }
-
-    public Statistic getCasVCakarniVstupnePesoStat() {
-        return casVCakarniVstupnePesoStat;
-    }
-
-    public Statistic getCasVCakarniVstupneSanitkaStat() {
-        return casVCakarniVstupneSanitkaStat;
-    }
-
-    public Statistic getCasVCakarniOsetreniePriorita(int priorita) {
-        return casVCakarniOsetreniePrioritaStat[priorita];
     }
 }

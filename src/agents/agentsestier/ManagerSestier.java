@@ -3,7 +3,6 @@ package agents.agentsestier;
 import OSPABA.*;
 import entity.Sestra;
 import simulation.*;
-import statistiky.TimeWeightedStatistic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +12,6 @@ import java.util.PriorityQueue;
 public class ManagerSestier extends OSPABA.Manager
 {
     PriorityQueue<MyMessage> radCakajucich;
-
-    TimeWeightedStatistic vytazenieSestryStat;
 
     public List<MyMessage> getRadCakajucich() {
         return new ArrayList<>(radCakajucich);
@@ -38,9 +35,6 @@ public class ManagerSestier extends OSPABA.Manager
 		}
 
         this.radCakajucich = new PriorityQueue<>(MyMessage.PORADIE);
-
-        vytazenieSestryStat = new TimeWeightedStatistic("Vytazenie sestier",
-                mySim().currentTime(), 0);
 	}
 
 	//meta! sender="AgentUrgentu", id="39", type="Notice"
@@ -57,8 +51,7 @@ public class ManagerSestier extends OSPABA.Manager
 
         if (volnaSestra != null) {
             msg.setSestra(volnaSestra);
-            vytazenieSestryStat.update((double) myAgent().getPocetObsadenychSestier() / ((MySimulation) mySim()).getPocetSestier(),
-                    mySim().currentTime());
+            myAgent().aktualizujVytazenieSestier();
             response(msg);
         } else {
             ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
@@ -74,8 +67,7 @@ public class ManagerSestier extends OSPABA.Manager
 
         myAgent().uvolniSestru(msg.getSestra());
 
-        vytazenieSestryStat.update((double) myAgent().getPocetObsadenychSestier() / ((MySimulation) mySim()).getPocetSestier(),
-                mySim().currentTime());
+        myAgent().aktualizujVytazenieSestier();
 
         skusPridatSestruDalsiemu();
 	}
@@ -91,9 +83,7 @@ public class ManagerSestier extends OSPABA.Manager
 	//meta! sender="AgentUrgentu", id="146", type="Notice"
 	public void processKoniecZahrievania(MessageForm message)
 	{
-        double now = mySim().currentTime();
-
-        vytazenieSestryStat.reset(now, 0);
+        myAgent().resetStatistikyPoZahrievani();
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"
@@ -143,15 +133,9 @@ public class ManagerSestier extends OSPABA.Manager
             if (volnaSestra != null) {
                 cakajucaSprava = radCakajucich.poll();
                 cakajucaSprava.setSestra(volnaSestra);
-                vytazenieSestryStat.update((double) myAgent().getPocetObsadenychSestier() / ((MySimulation) mySim()).getPocetSestier(),
-                        mySim().currentTime());
+                myAgent().aktualizujVytazenieSestier();
                 response(cakajucaSprava);
             }
         }
-    }
-
-    public TimeWeightedStatistic getVytazenieSestryStat()
-    {
-        return vytazenieSestryStat;
     }
 }

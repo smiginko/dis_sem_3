@@ -2,13 +2,10 @@ package agents.agentokolia;
 
 import OSPABA.*;
 import simulation.*;
-import statistiky.Statistic;
 
 //meta! id="3"
 public class ManagerOkolia extends OSPABA.Manager
 {
-    private Statistic celkovyCasVSystemeStat;
-
 	public ManagerOkolia(int id, Simulation mySim, Agent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -25,8 +22,6 @@ public class ManagerOkolia extends OSPABA.Manager
 		{
 			petriNet().clear();
 		}
-
-        celkovyCasVSystemeStat = new Statistic("Celkovy cas pacienta v systeme");
 	}
 
 
@@ -48,9 +43,7 @@ public class ManagerOkolia extends OSPABA.Manager
 	{
         MyMessage msg = (MyMessage) message;
 
-        celkovyCasVSystemeStat.addValue(
-                mySim().currentTime() - msg.getPacient().getCasPrichodu()
-        );
+        myAgent().zapisCelkovyCasVSysteme( msg );
 
         ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id() + " opustil urgentný príjem");
     }
@@ -82,7 +75,7 @@ public class ManagerOkolia extends OSPABA.Manager
 	//meta! sender="HlavnyAgent", id="138", type="Notice"
 	public void processKoniecZahrievania(MessageForm message)
 	{
-        celkovyCasVSystemeStat.reset();
+        myAgent().resetStatistikyPoZahrievani();
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"
@@ -132,9 +125,4 @@ public class ManagerOkolia extends OSPABA.Manager
 	{
 		return (AgentOkolia)super.myAgent();
 	}
-
-    public Statistic getCelkovyCasVSystemeStat() {
-        return celkovyCasVSystemeStat;
-    }
-
 }

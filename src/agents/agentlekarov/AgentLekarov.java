@@ -5,14 +5,17 @@ import entity.Ambulancia;
 import simulation.*;
 import entity.Lekar;
 import entity.Sestra;
+import statistiky.TimeWeightedStatistic;
+
 import java.util.ArrayList;
 import java.util.List;
 
 //meta! id="45"
 public class AgentLekarov extends OSPABA.Agent
 {
-
     private final List<Lekar> lekari = new ArrayList<>();
+
+    TimeWeightedStatistic vytazenieLekarovStat;
 
 	public AgentLekarov(int id, Simulation mySim, Agent parent)
 	{
@@ -36,6 +39,9 @@ public class AgentLekarov extends OSPABA.Agent
         for (int i = 0; i < sim.getPocetLekarov(); i++) {
             lekari.add(new Lekar(mySim()));
         }
+
+        vytazenieLekarovStat = new TimeWeightedStatistic("Vytazenie lekarov",
+                mySim().currentTime(), 0);
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"
@@ -131,5 +137,25 @@ public class AgentLekarov extends OSPABA.Agent
         }
 
         return pocet;
+    }
+
+    public void aktualizujVytazenieLekarov() {
+        MySimulation sim = (MySimulation) mySim();
+        vytazenieLekarovStat.update((double) getPocetObsadenychLekarov() / sim.getPocetLekarov(), mySim().currentTime());
+    }
+
+    public TimeWeightedStatistic getVytazenieLekarovStat() {
+        return vytazenieLekarovStat;
+    }
+
+    public void resetStatistikyPoZahrievani() {
+        MySimulation sim = (MySimulation) mySim();
+
+        double vytazenie = 0.0;
+        if (sim.getPocetLekarov() > 0) {
+            vytazenie = (double) getPocetObsadenychLekarov() / sim.getPocetLekarov();
+        }
+
+        vytazenieLekarovStat.reset(mySim().currentTime(), vytazenie);
     }
 }

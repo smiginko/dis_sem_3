@@ -6,12 +6,16 @@ import entity.Lekar;
 import entity.Sestra;
 import simulation.*;
 import entity.Ambulancia;
+import statistiky.TimeWeightedStatistic;
+
 import java.util.ArrayList;
 import java.util.List;
 
 //meta! id="29"
 public class AgentAmbulancii extends OSPABA.Agent
 {
+    private TimeWeightedStatistic vytazenieAmbulanciiA;
+    private TimeWeightedStatistic vytazenieAmbulanciiB;
 
     private final List<Ambulancia> ambulancie = new ArrayList<>();
 
@@ -43,6 +47,18 @@ public class AgentAmbulancii extends OSPABA.Agent
         for (int i = 0; i < sim.getPocetAmbulanciiB(); i++) {
             ambulancie.add(new Ambulancia(mySim(), Ambulancia.TypeAmbulancia.TYP_B, layoutIndex++));
         }
+
+        this.vytazenieAmbulanciiA = new TimeWeightedStatistic(
+                "Vytazenie ambulancii typ A",
+                mySim().currentTime(),
+                0
+        );
+
+        this.vytazenieAmbulanciiB = new TimeWeightedStatistic(
+                "Vytazenie ambulancii typ B",
+                mySim().currentTime(),
+                0
+        );
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"
@@ -282,5 +298,51 @@ public class AgentAmbulancii extends OSPABA.Agent
         }
 
         return pocet;
+    }
+
+    public TimeWeightedStatistic getVytazenieAmbulanciiA() {
+        return vytazenieAmbulanciiA;
+    }
+
+    public TimeWeightedStatistic getVytazenieAmbulanciiB() {
+        return vytazenieAmbulanciiB;
+    }
+
+    public void aktualizujVytazenieAmbulancii() {
+        MySimulation sim = (MySimulation) mySim();
+
+        double vytazenieA = 0.0;
+        if (sim.getPocetAmbulanciiA() > 0) {
+            vytazenieA = (double) getPocetObsadenychAmbulanciiA()
+                    / sim.getPocetAmbulanciiA();
+        }
+
+        double vytazenieB = 0.0;
+        if (sim.getPocetAmbulanciiB() > 0) {
+            vytazenieB = (double) getPocetObsadenychAmbulanciiB()
+                    / sim.getPocetAmbulanciiB();
+        }
+
+        vytazenieAmbulanciiA.update(vytazenieA, mySim().currentTime());
+        vytazenieAmbulanciiB.update(vytazenieB, mySim().currentTime());
+    }
+
+    public void resetStatistikyPoZahrievani() {
+        double now = mySim().currentTime();
+
+        MySimulation sim = (MySimulation) mySim();
+
+        double vytazenieA = 0.0;
+        if (sim.getPocetAmbulanciiA() > 0) {
+            vytazenieA = (double) getPocetObsadenychAmbulanciiA() / sim.getPocetAmbulanciiA();
+        }
+
+        double vytazenieB = 0.0;
+        if (sim.getPocetAmbulanciiB() > 0) {
+            vytazenieB = (double) getPocetObsadenychAmbulanciiB() / sim.getPocetAmbulanciiB();
+        }
+
+        vytazenieAmbulanciiA.reset(now, vytazenieA);
+        vytazenieAmbulanciiB.reset(now, vytazenieB);
     }
 }

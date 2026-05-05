@@ -4,14 +4,17 @@ import OSPABA.*;
 import entity.Ambulancia;
 import simulation.*;
 import entity.Sestra;
+import statistiky.TimeWeightedStatistic;
+
 import java.util.ArrayList;
 import java.util.List;
 
 //meta! id="35"
 public class AgentSestier extends OSPABA.Agent
 {
-
     private final List<Sestra> sestry = new ArrayList<>();
+
+    TimeWeightedStatistic vytazenieSestryStat;
 
 	public AgentSestier(int id, Simulation mySim, Agent parent)
 	{
@@ -35,6 +38,9 @@ public class AgentSestier extends OSPABA.Agent
         for (int i = 0; i < sim.getPocetSestier(); i++) {
             sestry.add(new Sestra(mySim()));
         }
+
+        vytazenieSestryStat = new TimeWeightedStatistic("Vytazenie sestier",
+                mySim().currentTime(), 0);
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"
@@ -131,4 +137,23 @@ public class AgentSestier extends OSPABA.Agent
         return fallback;
     }
 
+    public void aktualizujVytazenieSestier() {
+        MySimulation sim = (MySimulation) mySim();
+        vytazenieSestryStat.update((double) getPocetObsadenychSestier() / sim.getPocetSestier(), mySim().currentTime());
+    }
+
+    public TimeWeightedStatistic getVytazenieSestryStat() {
+        return vytazenieSestryStat;
+    }
+
+    public void resetStatistikyPoZahrievani() {
+        MySimulation sim = (MySimulation) mySim();
+
+        double vytazenie = 0.0;
+        if (sim.getPocetSestier() > 0) {
+            vytazenie = (double) getPocetObsadenychSestier() / sim.getPocetSestier();
+        }
+
+        vytazenieSestryStat.reset(mySim().currentTime(), vytazenie);
+    }
 }

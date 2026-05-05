@@ -38,8 +38,11 @@ public class MainGui extends JFrame implements ISimDelegate {
     private JTable sestryTable;
     private JTable lekariTable;
 
+    private GrafyUstalovaniObserver grafyObserver;
+
     public MainGui() {
         this.sim = new MySimulation();
+        this.grafyObserver = new GrafyUstalovaniObserver();
         setTitle("Simulácia Urgentného Príjmu");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -188,7 +191,15 @@ public class MainGui extends JFrame implements ISimDelegate {
         statistikyScroll.setBorder(BorderFactory.createTitledBorder("ŠTATISTIKY"));
 
         centerPanel.add(frontyPanel, BorderLayout.NORTH);
-        centerPanel.add(statistikyScroll, BorderLayout.CENTER);
+
+        JPanel midPanel = new JPanel(new GridLayout(1, 2, 5, 0));
+        midPanel.add(statistikyScroll);
+        JPanel grafyPanel = new JPanel(new GridLayout(2, 1, 0, 5));
+        grafyPanel.add(grafyObserver.getPesoPanel());
+        grafyPanel.add(grafyObserver.getSanitkaPanel());
+        midPanel.add(grafyPanel);
+
+        centerPanel.add(midPanel, BorderLayout.CENTER);
         // EAST: zdroje
         JPanel zdrojePanel = new JPanel(new GridLayout(3, 1, 5, 10));
         zdrojePanel.setPreferredSize(new Dimension(380, 0));
@@ -250,7 +261,7 @@ public class MainGui extends JFrame implements ISimDelegate {
     private void showStartDialog() {
         JSpinner repSpinner = new JSpinner(new SpinnerNumberModel(1000, 1, 100000, 1));
         JSpinner casSpinner = new JSpinner(new SpinnerNumberModel(2_419_200, 60, 10_419_200, 60));
-        JSpinner warmupSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 10_000_000, 3600));
+        JSpinner warmupSpinner = new JSpinner(new SpinnerNumberModel(100_000, 0, 10_000_000, 3600));
         JSpinner ambASpinner = new JSpinner(new SpinnerNumberModel(5, 1, 50, 1));
         JSpinner ambBSpinner = new JSpinner(new SpinnerNumberModel(7, 1, 50, 1));
         JSpinner sestrySpinner = new JSpinner(new SpinnerNumberModel(8, 1, 50, 1));
@@ -274,6 +285,7 @@ public class MainGui extends JFrame implements ISimDelegate {
         }
 
         finalDialogShown = false;
+        grafyObserver.reset();
         timeLabel.setText("NAČÍTAVANIE...");
         timeLabel.setForeground(Color.RED);
         logArea.setText("");
@@ -300,6 +312,7 @@ public class MainGui extends JFrame implements ISimDelegate {
         sim.registerDelegate(new FrontyObserver(vstupneTable, osetreniTable));
         sim.registerDelegate(new ZdrojeObserver(ambulancieTable, sestryTable, lekariTable));
         sim.registerDelegate(new StatistikyObserver(statistikyArea));
+        sim.registerDelegate(grafyObserver);
         sim.registerDelegate(this);
 
         setRunningControls(true);
@@ -320,12 +333,17 @@ public class MainGui extends JFrame implements ISimDelegate {
             return;
         }
 
+        boolean warmupKoncil = s.pollWarmupJustEnded();
         java.util.List<String> newLogs = s.getNewLogs();
 
         SwingUtilities.invokeLater(() -> {
-            timeLabel.setText(formatCas(s.currentTime()));
+            timeLabel.setText(formatCas(s.currentTime() - s.getWarmupTime()));
             timeLabel.setForeground(Color.BLACK);
             repLabel.setText("Rep: " + s.currentReplication());
+
+            if (warmupKoncil) {
+                logArea.setText("");
+            }
 
             for (String log : newLogs) logArea.append(log + "\n");
             if (!newLogs.isEmpty()) logArea.setCaretPosition(logArea.getDocument().getLength());
