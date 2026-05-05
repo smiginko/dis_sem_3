@@ -1,6 +1,7 @@
 package agents.agentlekarov;
 
 import OSPABA.*;
+import entity.Ambulancia;
 import simulation.*;
 import entity.Lekar;
 import entity.Sestra;
@@ -48,7 +49,7 @@ public class AgentLekarov extends OSPABA.Agent
 	}
 	//meta! tag="end"
 
-    public Lekar vyberVolnehoLekara()
+    public Lekar vyberVolnehoLekara(Ambulancia cielovaAmbulancia)
     {
         StrategiaPridelovania strategia =
                 ((MySimulation) mySim()).getStrategiaPridelovania();
@@ -59,6 +60,9 @@ public class AgentLekarov extends OSPABA.Agent
 
             case NAJDLHSIE_VOLNA:
                 return null;
+
+            case MINIMALNY_PRESUN_VYVAZENE_RADY:
+                return vyberVolnehoLekaraMinimalnyPresun(cielovaAmbulancia);
 
             default:
                 return vyberPrvehoLekara();
@@ -90,6 +94,31 @@ public class AgentLekarov extends OSPABA.Agent
             }
             lekar.setAktualnaAmbulancia(null);
         }
+    }
+
+    private Lekar vyberVolnehoLekaraMinimalnyPresun(Ambulancia cielovaAmbulancia) {
+        Lekar vystup = null;
+
+        for (Lekar lekar : lekari) {
+            if (lekar.jeObsadeny()) {
+                continue;
+            }
+
+            if (lekar.getPoloha() == cielovaAmbulancia) {
+                lekar.setJeObsadeny(true);
+                return lekar;
+            }
+
+            if (vystup == null || lekar.id() < vystup.id()) {
+                vystup = lekar;
+            }
+        }
+
+        if (vystup != null) {
+            vystup.setJeObsadeny(true);
+        }
+
+        return vystup;
     }
 
     public int getPocetObsadenychLekarov() {

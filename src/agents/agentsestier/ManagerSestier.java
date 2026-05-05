@@ -53,7 +53,7 @@ public class ManagerSestier extends OSPABA.Manager
 	{
         MyMessage msg = (MyMessage) message;
 
-        Sestra volnaSestra = myAgent().vyberVolnuSestru();
+        Sestra volnaSestra = myAgent().vyberVolnuSestru(msg.getAmbulancia());
 
         if (volnaSestra != null) {
             msg.setSestra(volnaSestra);
@@ -137,10 +137,11 @@ public class ManagerSestier extends OSPABA.Manager
 
     private void skusPridatSestruDalsiemu() {
         if (!radCakajucich.isEmpty()) {
-            Sestra volnaSestra = myAgent().vyberVolnuSestru();
+            MyMessage cakajucaSprava = radCakajucich.peek();
+            Sestra volnaSestra = myAgent().vyberVolnuSestru(cakajucaSprava.getAmbulancia());
 
             if (volnaSestra != null) {
-                MyMessage cakajucaSprava = radCakajucich.poll();
+                cakajucaSprava = radCakajucich.poll();
                 cakajucaSprava.setSestra(volnaSestra);
                 vytazenieSestryStat.update((double) myAgent().getPocetObsadenychSestier() / ((MySimulation) mySim()).getPocetSestier(),
                         mySim().currentTime());

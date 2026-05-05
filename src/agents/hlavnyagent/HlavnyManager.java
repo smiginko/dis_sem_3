@@ -71,6 +71,12 @@ public class HlavnyManager extends OSPABA.Manager
             o.setCode(Mc.koniecZahrievania);
             o.setAddressee(Id.agentOkolia);
             notice(o);
+
+            MySimulation s = (MySimulation) mySim();
+            Double desired = s.getDesiredSpeedDuration();
+            if (desired != null) {
+                s.setSimSpeed(1.0, desired);
+            }
         }
 	}
 

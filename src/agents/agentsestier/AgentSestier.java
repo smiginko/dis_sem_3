@@ -1,6 +1,7 @@
 package agents.agentsestier;
 
 import OSPABA.*;
+import entity.Ambulancia;
 import simulation.*;
 import entity.Sestra;
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class AgentSestier extends OSPABA.Agent
 	}
 	//meta! tag="end"
 
-    public Sestra vyberVolnuSestru()
+    public Sestra vyberVolnuSestru(Ambulancia cielovaAmbulancia)
     {
         StrategiaPridelovania strategia =
                 ((MySimulation) mySim()).getStrategiaPridelovania();
@@ -58,6 +59,9 @@ public class AgentSestier extends OSPABA.Agent
 
             case NAJDLHSIE_VOLNA:
                 return null;
+
+            case MINIMALNY_PRESUN_VYVAZENE_RADY:
+                return vyberVolnuSestruMinimalnyPresun(cielovaAmbulancia);
 
             default:
                 return vyberPrvuVolnuSestru();
@@ -101,4 +105,30 @@ public class AgentSestier extends OSPABA.Agent
         }
         return pocet;
     }
+
+    private Sestra vyberVolnuSestruMinimalnyPresun(Ambulancia cielovaAmbulancia) {
+        Sestra fallback = null;
+
+        for (Sestra sestra : sestry) {
+            if (sestra.jeObsadena()) {
+                continue;
+            }
+
+            if (sestra.getPoloha() == cielovaAmbulancia) {
+                sestra.setJeObsadena(true);
+                return sestra;
+            }
+
+            if (fallback == null || sestra.id() < fallback.id()) {
+                fallback = sestra;
+            }
+        }
+
+        if (fallback != null) {
+            fallback.setJeObsadena(true);
+        }
+
+        return fallback;
+    }
+
 }

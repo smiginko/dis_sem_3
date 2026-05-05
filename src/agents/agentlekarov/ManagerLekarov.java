@@ -52,7 +52,7 @@ public class ManagerLekarov extends OSPABA.Manager
 	{
         MyMessage msg = (MyMessage) message;
 
-        Lekar volnyLekar = myAgent().vyberVolnehoLekara();
+        Lekar volnyLekar = myAgent().vyberVolnehoLekara(msg.getAmbulancia());
 
         if (volnyLekar != null) {
             msg.setLekar(volnyLekar);
@@ -136,10 +136,11 @@ public class ManagerLekarov extends OSPABA.Manager
 
     private void skusPridatLekaraDalsiemu() {
         if (!radCakajucich.isEmpty()) {
-            Lekar volnyLekar = myAgent().vyberVolnehoLekara();
+            MyMessage cakajucaSprava = radCakajucich.peek();
+            Lekar volnyLekar = myAgent().vyberVolnehoLekara(cakajucaSprava.getAmbulancia());
 
             if (volnyLekar != null) {
-                MyMessage cakajucaSprava = radCakajucich.poll();
+                cakajucaSprava = radCakajucich.poll();
                 cakajucaSprava.setLekar(volnyLekar);
                 vytazenieLekarovStat.update((double) myAgent().getPocetObsadenychLekarov() / ((MySimulation) mySim()).getPocetLekarov(),
                         mySim().currentTime());

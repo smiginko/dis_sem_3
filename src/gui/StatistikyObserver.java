@@ -68,8 +68,6 @@ public class StatistikyObserver implements ISimDelegate {
         double t = s.currentTime();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("== LOKALNE (rep. ").append(s.currentReplication()).append(") ==\n\n");
-
         sb.append("  CAKACIE DOBY\n");
         sb.append(radokStat("  Vstupne vysetrenie - PESO", managerUrgentu.getCasVCakarniVstupnePesoStat(), StatFormat.SECONDS));
         sb.append(radokStat("  Vstupne vysetrenie - SANITKA", managerUrgentu.getCasVCakarniVstupneSanitkaStat(), StatFormat.SECONDS));
@@ -97,8 +95,6 @@ public class StatistikyObserver implements ISimDelegate {
 
     private String vytvorGlobalneStatistikyText(MySimulation s) {
         StringBuilder sb = new StringBuilder();
-        sb.append("== GLOBALNE (").append(s.currentReplication()).append(" replikacii) ==\n\n");
-
         sb.append("  CAKACIE DOBY\n");
         sb.append(radokStatIS("  Vstupne vysetrenie - PESO", s.getGlobCasVCakarniVstupnePeso(), StatFormat.SECONDS));
         sb.append(radokStatIS("  Vstupne vysetrenie - SANITKA", s.getGlobCasVCakarniVstupneSanitka(), StatFormat.SECONDS));

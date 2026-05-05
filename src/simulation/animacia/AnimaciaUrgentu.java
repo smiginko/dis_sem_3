@@ -51,7 +51,7 @@ public class AnimaciaUrgentu {
     }
 
     public void registrujPacientaNaVstupe(Pacient pacient) {
-        if (!sim.animatorExists()) {
+        if (!shouldAnimate()) {
             return;
         }
 
@@ -73,7 +73,7 @@ public class AnimaciaUrgentu {
     }
 
     public void presunPacientaDoCakarne(Pacient pacient, double trvaniePresunu) {
-        if (!sim.animatorExists()) {
+        if (!shouldAnimate()) {
             return;
         }
 
@@ -172,7 +172,7 @@ public class AnimaciaUrgentu {
     }
 
     public void presunPacientaDoAmbulancie(Pacient pacient, Ambulancia ambulancia, double trvaniePresunu) {
-        if (!sim.animatorExists()) return;
+        if (!shouldAnimate()) return;
         if (pacient == null || ambulancia == null) return;
         AnimImageItem item = pacientItems.get(pacient.id());
         if (item == null) return;
@@ -184,7 +184,7 @@ public class AnimaciaUrgentu {
     }
 
     public void presunSestruDoAmbulancie(Sestra sestra, Ambulancia ambulancia, double trvaniePresunu) {
-        if (!sim.animatorExists()) return;
+        if (!shouldAnimate()) return;
         if (sestra == null || ambulancia == null) return;
         AnimImageItem item = sestraItems.get(sestra.id());
         if (item == null) return;
@@ -195,7 +195,7 @@ public class AnimaciaUrgentu {
     }
 
     public void presunLekaraDoAmbulancie(Lekar lekar, Ambulancia ambulancia, double trvaniePresunu) {
-        if (!sim.animatorExists()) return;
+        if (!shouldAnimate()) return;
         if (lekar == null || ambulancia == null) return;
         AnimImageItem item = lekarItems.get(lekar.id());
         if (item == null) return;
@@ -206,7 +206,7 @@ public class AnimaciaUrgentu {
     }
 
     public void odchodPacientaZAmbulancie(Pacient pacient, double trvaniePresunu) {
-        if (!sim.animatorExists()) return;
+        if (!shouldAnimate()) return;
         AnimImageItem item = pacientItems.get(pacient.id());
         if (item == null) return;
         Point2D.Double ciel = LayoutUrgentu.VSTUP_PESO;
@@ -214,13 +214,17 @@ public class AnimaciaUrgentu {
     }
 
     public void zmazPacienta(Pacient pacient) {
-        if (!sim.animatorExists()) return;
+        if (!shouldAnimate()) return;
         AnimImageItem item = pacientItems.get(pacient.id());
         if (item != null) {
             item.setVisible(sim.currentTime(), false);
             item.setPosition(sim.currentTime(), -100, -100);
             pacientItems.remove(pacient.id());
         }
+    }
+
+    private boolean shouldAnimate() {
+        return sim.animatorExists() && !sim.isMaxSpeed();
     }
 
     private void teleport(AnimImageItem item, Point2D.Double ciel) {

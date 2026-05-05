@@ -62,7 +62,7 @@ public class ManagerAmbulancii extends OSPABA.Manager
 	{
         MyMessage msg = (MyMessage) message;
 
-        Ambulancia volnaAmbulancia = myAgent().vyberVolnuAmbulanciu(msg.isPovolenaAmbulanciaA(), msg.isPovolenaAmbulanciaB());
+        Ambulancia volnaAmbulancia = myAgent().vyberVolnuAmbulanciu(msg);
 
         if (volnaAmbulancia != null) {
             msg.setAmbulancia(volnaAmbulancia);
@@ -145,8 +145,11 @@ public class ManagerAmbulancii extends OSPABA.Manager
 	}
 
     private void skusPridatAmbulanciuDalsiemu() {
-        for (MyMessage msg : radCakajucich) {
-            Ambulancia a = myAgent().vyberVolnuAmbulanciu(msg.isPovolenaAmbulanciaA(), msg.isPovolenaAmbulanciaB());
+        List<MyMessage> kandidati = new ArrayList<>(radCakajucich);
+        kandidati.sort(MyMessage.PORADIE);
+
+        for (MyMessage msg : kandidati) {
+            Ambulancia a = myAgent().vyberVolnuAmbulanciu(msg);
             if (a != null) {
                 radCakajucich.remove(msg);
                 msg.setAmbulancia(a);

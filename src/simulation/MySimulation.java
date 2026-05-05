@@ -93,7 +93,9 @@ public class MySimulation extends OSPABA.Simulation
         animaciaUrgentu.prepareReplication();
         logs.clear();
 
-        if (desiredSpeedDuration != null) {
+        if (warmupTime > 0) {
+            setMaxSimSpeed();
+        } else if (desiredSpeedDuration != null) {
             setSimSpeed(1.0, desiredSpeedDuration);
         } else {
             setMaxSimSpeed();
@@ -330,8 +332,9 @@ public AgentLekarov agentLekarov()
     public List<Double> getAnalysisValues() { return new ArrayList<>(analysisValues); }
     public boolean isCollectAnalysisData()  { return collectAnalysisData; }
     public void setCollectAnalysisData(boolean v) { collectAnalysisData = v; }
-    public double getWarmupTime()           { return warmupTime; }
-    public void setWarmupTime(double t)     { this.warmupTime = t; }
+    public double getWarmupTime()             { return warmupTime; }
+    public void setWarmupTime(double t)       { this.warmupTime = t; }
+    public Double getDesiredSpeedDuration()   { return desiredSpeedDuration; }
 
     private String formatCas(double totalSeconds) {
         if (Double.isNaN(totalSeconds) || totalSeconds < 0) return "00:00:00";
