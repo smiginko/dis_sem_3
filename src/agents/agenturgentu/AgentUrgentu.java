@@ -17,6 +17,8 @@ public class AgentUrgentu extends OSPABA.Agent
     private int pocetCakajucichNaOsetrenie;
     private Statistic casVCakarniVstupnePesoStat;
     private Statistic casVCakarniVstupneSanitkaStat;
+    private Statistic casOdVstupuPoZaciatokOsetreniaSanitkaStat;
+    private Statistic casOdVstupuPoZaciatokOsetreniaPesoStat;
     private Statistic[] casVCakarniOsetreniePrioritaStat;
 
 	public AgentUrgentu(int id, Simulation mySim, Agent parent)
@@ -53,6 +55,12 @@ public class AgentUrgentu extends OSPABA.Agent
             casVCakarniOsetreniePrioritaStat[priorita] =
                     new Statistic("Cas cakania na osetrenie - priorita " + priorita);
         }
+
+        casOdVstupuPoZaciatokOsetreniaSanitkaStat =
+                new Statistic("Cas od vstupu po zaciatok osetrenia - SANITKA");
+
+        casOdVstupuPoZaciatokOsetreniaPesoStat =
+                new Statistic("Cas od vstupu po zaciatok osetrenia - PESO");
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"
@@ -108,6 +116,27 @@ public class AgentUrgentu extends OSPABA.Agent
         casVCakarniOsetreniePrioritaStat[priorita].addValue(cakanie);
     }
 
+    public void zapisCasOdVstupuPoZaciatokOsetrenia(MyMessage msg) {
+        MySimulation sim = (MySimulation) mySim();
+
+        if (msg.getPacient().getCasPrichodu() < sim.getWarmupTime()) {
+            return;
+        }
+
+        double cas = mySim().currentTime() - msg.getPacient().getCasPrichodu();
+
+        switch (msg.getPacient().getTyp()) {
+            case SANITKA:
+                casOdVstupuPoZaciatokOsetreniaSanitkaStat.addValue(cas);
+                break;
+            case PESO:
+                casOdVstupuPoZaciatokOsetreniaPesoStat.addValue(cas);
+                break;
+            default:
+                throw new IllegalStateException("Neznamy typ pacienta: " + msg.getPacient().getTyp());
+        }
+    }
+
     public void zacalCakatNaVstupne() {
         pocetCakajucichNaVstupne++;
         dlzkaRaduVstupne.update(pocetCakajucichNaVstupne, mySim().currentTime());
@@ -157,6 +186,14 @@ public class AgentUrgentu extends OSPABA.Agent
         return casVCakarniOsetreniePrioritaStat[priorita];
     }
 
+    public Statistic getCasOdVstupuPoZaciatokOsetreniaSanitkaStat() {
+        return casOdVstupuPoZaciatokOsetreniaSanitkaStat;
+    }
+
+    public Statistic getCasOdVstupuPoZaciatokOsetreniaPesoStat() {
+        return casOdVstupuPoZaciatokOsetreniaPesoStat;
+    }
+
     public void resetStatistikyPoZahrievani() {
         double now = mySim().currentTime();
 
@@ -169,5 +206,8 @@ public class AgentUrgentu extends OSPABA.Agent
         for (int priorita = 1; priorita <= 5; priorita++) {
             casVCakarniOsetreniePrioritaStat[priorita].reset();
         }
+
+        casOdVstupuPoZaciatokOsetreniaSanitkaStat.reset();
+        casOdVstupuPoZaciatokOsetreniaPesoStat.reset();
     }
 }

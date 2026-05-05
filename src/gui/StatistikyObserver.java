@@ -76,6 +76,8 @@ public class StatistikyObserver implements ISimDelegate {
         sb.append("  CAKACIE DOBY\n");
         sb.append(radokStat("  Vstupne vysetrenie - PESO", urgent.getCasVCakarniVstupnePesoStat(), StatFormat.SECONDS));
         sb.append(radokStat("  Vstupne vysetrenie - SANITKA", urgent.getCasVCakarniVstupneSanitkaStat(), StatFormat.SECONDS));
+        sb.append(radokStat("  Od vstupu po zac. osetrenia - PESO", urgent.getCasOdVstupuPoZaciatokOsetreniaPesoStat(), StatFormat.SECONDS));
+        sb.append(radokStat("  Od vstupu po zac. osetrenia - SANITKA", urgent.getCasOdVstupuPoZaciatokOsetreniaSanitkaStat(), StatFormat.SECONDS));
 
         for (int p = 1; p <= 5; p++) {
             sb.append(radokStat("  Osetrenie - priorita " + p,
@@ -103,6 +105,8 @@ public class StatistikyObserver implements ISimDelegate {
         sb.append("  CAKACIE DOBY\n");
         sb.append(radokStatIS("  Vstupne vysetrenie - PESO", s.getGlobCasVCakarniVstupnePeso(), StatFormat.SECONDS));
         sb.append(radokStatIS("  Vstupne vysetrenie - SANITKA", s.getGlobCasVCakarniVstupneSanitka(), StatFormat.SECONDS));
+        sb.append(radokStatIS("  Od vstupu po zac. osetrenia - PESO", s.getGlobCasOdVstupuPoZaciatokOsetreniaPeso(), StatFormat.SECONDS));
+        sb.append(radokStatIS("  Od vstupu po zac. osetrenia - SANITKA", s.getGlobCasOdVstupuPoZaciatokOsetreniaSanitka(), StatFormat.SECONDS));
 
         for (int p = 1; p <= 5; p++) {
             sb.append(radokStatIS("  Osetrenie - priorita " + p,

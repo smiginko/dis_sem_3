@@ -32,10 +32,10 @@ public class GrafyUstalovaniObserver implements ISimDelegate {
 
     public GrafyUstalovaniObserver() {
         pesoPanel = new ChartPanel(vytvorGraf(
-                "Ustálenie – priem. čakanie na vstupné vyšetrenie (PESO)",
+                "Ustálenie –  cas od vstupu po zaciatok osetrenia (PESO)",
                 seriePeso, new Color(0, 100, 200)));
         sanitkaPanel = new ChartPanel(vytvorGraf(
-                "Ustálenie – priem. čakanie na vstupné vyšetrenie (SANITKA)",
+                "Ustálenie – cas od vstupu po zaciatok osetrenia (SANITKA)",
                 serieSanitka, new Color(180, 40, 0)));
     }
 
@@ -59,26 +59,19 @@ public class GrafyUstalovaniObserver implements ISimDelegate {
         if (state != SimState.replicationStopped) return;
 
         MySimulation s = (MySimulation) simulation;
-        repCount++;
+        int rep = s.currentReplication();
 
         double pesoVal = Double.NaN;
         double sanitkaVal = Double.NaN;
 
-        if (s.agentUrgentu().getCasVCakarniVstupnePesoStat().getCount() > 0) {
-            pesoRepCount++;
-            double v = s.agentUrgentu().getCasVCakarniVstupnePesoStat().getAverage();
-            runAvgPeso = ((runAvgPeso * (pesoRepCount - 1)) + v) / pesoRepCount;
-            pesoVal = runAvgPeso;
+        if (s.getGlobCasOdVstupuPoZaciatokOsetreniaPeso().getCount() > 0) {
+            pesoVal = s.getGlobCasOdVstupuPoZaciatokOsetreniaPeso().getAverage();
         }
 
-        if (s.agentUrgentu().getCasVCakarniVstupneSanitkaStat().getCount() > 0) {
-            sanitkaRepCount++;
-            double v = s.agentUrgentu().getCasVCakarniVstupneSanitkaStat().getAverage();
-            runAvgSanitka = ((runAvgSanitka * (sanitkaRepCount - 1)) + v) / sanitkaRepCount;
-            sanitkaVal = runAvgSanitka;
+        if (s.getGlobCasOdVstupuPoZaciatokOsetreniaSanitka().getCount() > 0) {
+            sanitkaVal = s.getGlobCasOdVstupuPoZaciatokOsetreniaSanitka().getAverage();
         }
 
-        final int rep = repCount;
         final double fp = pesoVal;
         final double fs = sanitkaVal;
 

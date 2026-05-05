@@ -1,7 +1,6 @@
 package simulation;
 
 import agents.agentlekarov.*;
-import OSPABA.*;
 import agents.agentosetrenia.*;
 import agents.agentokolia.*;
 import agents.agentsestier.*;
@@ -12,12 +11,17 @@ import agents.agentambulancii.*;
 import simulation.animacia.AnimaciaUrgentu;
 import statistiky.Statistic;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class MySimulation extends OSPABA.Simulation
 {
+    private static final double LIMIT_SANITKA_DO_OSETRENIA = 15 * 60.0;
+    private static final double LIMIT_PESO_DO_OSETRENIA = 30 * 60.0;
 
     private Statistic globCasVCakarniVstupnePeso;
     private Statistic globCasVCakarniVstupneSanitka;
@@ -29,9 +33,13 @@ public class MySimulation extends OSPABA.Simulation
     private Statistic globVytazenieSestier;
     private Statistic globVytazenieAmbulanciiA;
     private Statistic globVytazenieAmbulanciiB;
+    private Statistic globCasOdVstupuPoZaciatokOsetreniaSanitka;
+    private Statistic globCasOdVstupuPoZaciatokOsetreniaPeso;
 
     private AnimaciaUrgentu animaciaUrgentu;
-    private StrategiaPridelovania strategiaPridelovania = StrategiaPridelovania.PRVA_VOLNA;
+    private StrategiaAmbulancii strategiaAmbulancii = StrategiaAmbulancii.VYVAZENY_TYP_A_B_PERSONAL_PRI_AMBULANCII;
+    private StrategiaSestier strategiaSestier = StrategiaSestier.SESTRA_V_AMBULANCII_INAK_PRVA_VOLNA;
+    private StrategiaLekarov strategiaLekarov = StrategiaLekarov.LEKAR_V_AMBULANCII_INAK_PRVY_VOLNY;
 
     // 1.0 = 1x reálny čas, 0.1 = 10x, null = turbo
     private Double desiredSpeedDuration = null;
@@ -84,6 +92,8 @@ public class MySimulation extends OSPABA.Simulation
         this.globVytazenieSestier = new Statistic("Vytazenie sestier");
         this.globVytazenieAmbulanciiA = new Statistic("Vytazenie ambulancii typ A");
         this.globVytazenieAmbulanciiB = new Statistic("Vytazenie ambulancii typ B");
+        globCasOdVstupuPoZaciatokOsetreniaSanitka = new Statistic("Cas od vstupu po zaciatok osetrenia - SANITKA");
+        globCasOdVstupuPoZaciatokOsetreniaPeso = new Statistic("Cas od vstupu po zaciatok osetrenia - PESO");
 	}
 
 	@Override
@@ -167,6 +177,18 @@ public class MySimulation extends OSPABA.Simulation
                 lekari.getVytazenieLekarovStat().getAverage(currentTime())
         );
 
+        if (urgent.getCasOdVstupuPoZaciatokOsetreniaSanitkaStat().getCount() > 0) {
+            globCasOdVstupuPoZaciatokOsetreniaSanitka.addValue(
+                    urgent.getCasOdVstupuPoZaciatokOsetreniaSanitkaStat().getAverage()
+            );
+        }
+
+        if (urgent.getCasOdVstupuPoZaciatokOsetreniaPesoStat().getCount() > 0) {
+            globCasOdVstupuPoZaciatokOsetreniaPeso.addValue(
+                    urgent.getCasOdVstupuPoZaciatokOsetreniaPesoStat().getAverage()
+            );
+        }
+
         super.replicationFinished();
     }
 
@@ -190,7 +212,156 @@ public class MySimulation extends OSPABA.Simulation
 		setAgentLekarov(new AgentLekarov(Id.agentLekarov, this, agentUrgentu()));
 	}
 
-	private HlavnyAgent _hlavnyAgent;
+    /**
+     *  Táto časť kódu vznikla pregenrovaním pomocou AI z riešenie z druhej semestrálnej práce
+     */
+
+    public static class PersonalExperimentResult {
+        public final int pocetSestier;
+        public final int pocetLekarov;
+        public final double casSanitka;
+        public final double casPeso;
+        public final boolean found;
+
+        public PersonalExperimentResult(int pocetSestier, int pocetLekarov,
+                                        double casSanitka, double casPeso,
+                                        boolean found) {
+            this.pocetSestier = pocetSestier;
+            this.pocetLekarov = pocetLekarov;
+            this.casSanitka = casSanitka;
+            this.casPeso = casPeso;
+            this.found = found;
+        }
+    }
+
+    public PersonalExperimentResult runPersonalExperiment(
+            int minSestry,
+            int maxSestry,
+            int minLekari,
+            int maxLekari,
+            int reps,
+            double simTime,
+            double warmUp,
+            int pocetAmbulanciiA,
+            int pocetAmbulanciiB,
+            StrategiaLekarov strategiaLekarov,
+            StrategiaSestier strategiaSestier,
+            StrategiaAmbulancii strategiaAmbulancii
+    ) {
+        return runPersonalExperiment(
+                minSestry,
+                maxSestry,
+                minLekari,
+                maxLekari,
+                reps,
+                simTime,
+                warmUp,
+                pocetAmbulanciiA,
+                pocetAmbulanciiB,
+                strategiaAmbulancii,
+                strategiaSestier,
+                strategiaLekarov
+        );
+    }
+
+    public PersonalExperimentResult runPersonalExperiment(
+            int minSestry,
+            int maxSestry,
+            int minLekari,
+            int maxLekari,
+            int reps,
+            double simTime,
+            double warmUp,
+            int pocetAmbulanciiA,
+            int pocetAmbulanciiB,
+            StrategiaAmbulancii strategiaAmbulancii,
+            StrategiaSestier strategiaSestier,
+            StrategiaLekarov strategiaLekarov
+    ) {
+        File dir = new File("assets");
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+
+        try (PrintWriter pw = new PrintWriter(new File(dir, "experiment_personal.csv"))) {
+            pw.println("Sestry;Lekari;Sanitka_do_osetrenia_s;Peso_do_osetrenia_s;Status");
+
+            for (int total = minSestry + minLekari; total <= maxSestry + maxLekari; total++) {
+                PersonalExperimentResult bestInLayer = null;
+
+                for (int sestry = minSestry; sestry <= maxSestry; sestry++) {
+                    int lekari = total - sestry;
+
+                    if (lekari < minLekari || lekari > maxLekari) {
+                        continue;
+                    }
+
+                    MySimulation test = new MySimulation();
+                    test.setPocetAmbulanciiA(pocetAmbulanciiA);
+                    test.setPocetAmbulanciiB(pocetAmbulanciiB);
+                    test.setPocetSestier(sestry);
+                    test.setPocetLekarov(lekari);
+                    test.setWarmupTime(warmUp);
+                    test.setStrategiaAmbulancii(strategiaAmbulancii);
+                    test.setStrategiaSestier(strategiaSestier);
+                    test.setStrategiaLekarov(strategiaLekarov);
+                    test.setTurboDesired();
+
+                    test.simulate(reps, simTime + warmUp);
+
+                    Statistic sanitkaStat = test.getGlobCasOdVstupuPoZaciatokOsetreniaSanitka();
+                    Statistic pesoStat = test.getGlobCasOdVstupuPoZaciatokOsetreniaPeso();
+
+                    boolean hasData = sanitkaStat.getCount() > 0 && pesoStat.getCount() > 0;
+                    double casSanitka = hasData ? sanitkaStat.getAverage() : Double.NaN;
+                    double casPeso = hasData ? pesoStat.getAverage() : Double.NaN;
+
+                    boolean ok = hasData
+                            && casSanitka <= LIMIT_SANITKA_DO_OSETRENIA
+                            && casPeso < LIMIT_PESO_DO_OSETRENIA;
+
+                    pw.printf(Locale.US, "%d;%d;%.2f;%.2f;%s%n",
+                            sestry,
+                            lekari,
+                            casSanitka,
+                            casPeso,
+                            ok ? "OK" : "FAIL"
+                    );
+                    pw.flush();
+
+                    if (ok) {
+                        PersonalExperimentResult candidate =
+                                new PersonalExperimentResult(sestry, lekari, casSanitka, casPeso, true);
+
+                        if (bestInLayer == null || personalExperimentScore(candidate) < personalExperimentScore(bestInLayer)) {
+                            bestInLayer = candidate;
+                        }
+                    }
+                }
+
+                if (bestInLayer != null) {
+                    return bestInLayer;
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return new PersonalExperimentResult(-1, -1, Double.NaN, Double.NaN, false);
+    }
+
+    private double personalExperimentScore(PersonalExperimentResult result) {
+        return Math.max(
+                result.casSanitka / LIMIT_SANITKA_DO_OSETRENIA,
+                result.casPeso / LIMIT_PESO_DO_OSETRENIA
+        );
+    }
+
+    /**
+     * ------------------------------------------------
+     */
+
+    private HlavnyAgent _hlavnyAgent;
 
 public HlavnyAgent hlavnyAgent()
 	{ return _hlavnyAgent; }
@@ -273,12 +444,28 @@ public AgentLekarov agentLekarov()
 
     public Random  getSeedGenerator() { return seedGenerator; }
 
-    public StrategiaPridelovania getStrategiaPridelovania() {
-        return strategiaPridelovania;
+    public StrategiaAmbulancii getStrategiaAmbulancii() {
+        return strategiaAmbulancii;
     }
 
-    public void setStrategiaPridelovania(StrategiaPridelovania strategiaPridelovania) {
-        this.strategiaPridelovania = strategiaPridelovania;
+    public void setStrategiaAmbulancii(StrategiaAmbulancii strategiaAmbulancii) {
+        this.strategiaAmbulancii = strategiaAmbulancii;
+    }
+
+    public StrategiaSestier getStrategiaSestier() {
+        return strategiaSestier;
+    }
+
+    public void setStrategiaSestier(StrategiaSestier strategiaSestier) {
+        this.strategiaSestier = strategiaSestier;
+    }
+
+    public StrategiaLekarov getStrategiaLekarov() {
+        return strategiaLekarov;
+    }
+
+    public void setStrategiaLekarov(StrategiaLekarov strategiaLekarov) {
+        this.strategiaLekarov = strategiaLekarov;
     }
 
     public int getPocetSestier() {
@@ -356,5 +543,7 @@ public AgentLekarov agentLekarov()
     public Statistic getGlobVytazenieSestier() { return globVytazenieSestier; }
     public Statistic getGlobVytazenieAmbulanciiA() { return globVytazenieAmbulanciiA; }
     public Statistic getGlobVytazenieAmbulanciiB() { return globVytazenieAmbulanciiB; }
+    public Statistic getGlobCasOdVstupuPoZaciatokOsetreniaSanitka() { return globCasOdVstupuPoZaciatokOsetreniaSanitka; }
+    public Statistic getGlobCasOdVstupuPoZaciatokOsetreniaPeso() { return globCasOdVstupuPoZaciatokOsetreniaPeso; }
 
 }

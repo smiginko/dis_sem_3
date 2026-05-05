@@ -98,6 +98,7 @@ public class ManagerUrgentu extends OSPABA.Manager
                     + " priorita=" + msg.getPacient().getPriorita());
 
             myAgent().zapisCakanieNaOsetrenie(msg);
+            myAgent().zapisCasOdVstupuPoZaciatokOsetrenia(msg);
             myAgent().prestalCakatNaOsetrenie();
 
             message.setCode(Mc.osetreniePacienta);
@@ -424,8 +425,7 @@ public class ManagerUrgentu extends OSPABA.Manager
     }
 
     private MyMessage vyberZRaduVstupne() {
-        MyMessage msg = radNaVstupneVysetrenie.poll();
-        return msg;
+        return radNaVstupneVysetrenie.poll();
     }
 
     private void vlozDoRaduOsetrenie(MyMessage msg) {
@@ -441,8 +441,7 @@ public class ManagerUrgentu extends OSPABA.Manager
     }
 
     private MyMessage vyberZRaduOsetrenie() {
-        MyMessage msg = radNaOsetrenie.poll();
-        return msg;
+        return radNaOsetrenie.poll();
     }
 
     public List<MyMessage> getRadNaVstupneVysetrenie() {

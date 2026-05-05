@@ -74,19 +74,18 @@ public class AgentAmbulancii extends OSPABA.Agent
 
     public Ambulancia vyberVolnuAmbulanciu(MyMessage msg)
     {
-        StrategiaPridelovania strategia =
-                ((MySimulation) mySim()).getStrategiaPridelovania();
+        StrategiaAmbulancii strategia =
+                ((MySimulation) mySim()).getStrategiaAmbulancii();
 
         switch (strategia) {
-            case PRVA_VOLNA:
+            case PRVA_KOMPATIBILNA_VOLNA:
                 return vyberPrvuVolnuAmbulanciu(msg.isPovolenaAmbulanciaA(), msg.isPovolenaAmbulanciaB());
 
-            case NAJDLHSIE_VOLNA:
-                return null;
-
-            case MINIMALNY_PRESUN_VYVAZENE_RADY:
+            case VYVAZENY_TYP_A_B_PERSONAL_PRI_AMBULANCII:
                 return vyberMinimalnyPresunVyvazeneRady(msg);
 
+            case OCHRANA_TYP_A_PERSONAL_PRI_AMBULANCII:
+                return vyberSOchranoiTypA(msg);
 
             default:
                 return vyberPrvuVolnuAmbulanciu(msg.isPovolenaAmbulanciaA(), msg.isPovolenaAmbulanciaB());
@@ -136,6 +135,53 @@ public class AgentAmbulancii extends OSPABA.Agent
                 kandidati = preferovane;
             }
         }
+
+        Ambulancia najlepsia = null;
+        int najlepsiScore = Integer.MIN_VALUE;
+
+        for (Ambulancia ambulancia : kandidati) {
+            int score = scoreAmbulanciePrePresun(ambulancia, msg);
+
+            if (najlepsia == null
+                    || score > najlepsiScore
+                    || (score == najlepsiScore && ambulancia.id() < najlepsia.id())) {
+                najlepsia = ambulancia;
+                najlepsiScore = score;
+            }
+        }
+
+        najlepsia.setJeObsadena(true);
+        return najlepsia;
+    }
+
+    private Ambulancia vyberSOchranoiTypA(MyMessage msg) {
+        boolean mozeA = msg.isPovolenaAmbulanciaA();
+        boolean mozeB = msg.isPovolenaAmbulanciaB();
+
+        if (mozeA && mozeB) {
+            boolean existujeVolneB = pocetVolnychAmbulancii(Ambulancia.TypeAmbulancia.TYP_B) > 0;
+            Ambulancia.TypeAmbulancia preferovany = existujeVolneB
+                    ? Ambulancia.TypeAmbulancia.TYP_B
+                    : Ambulancia.TypeAmbulancia.TYP_A;
+
+            List<Ambulancia> kandidati = volneKompatibilneAmbulancie(
+                    preferovany == Ambulancia.TypeAmbulancia.TYP_A,
+                    preferovany == Ambulancia.TypeAmbulancia.TYP_B
+            );
+
+            if (kandidati.isEmpty()) {
+                kandidati = volneKompatibilneAmbulancie(mozeA, mozeB);
+            }
+
+            return vyberNajlepsiehoKandidataPrePresun(kandidati, msg);
+        }
+
+        List<Ambulancia> kandidati = volneKompatibilneAmbulancie(mozeA, mozeB);
+        return vyberNajlepsiehoKandidataPrePresun(kandidati, msg);
+    }
+
+    private Ambulancia vyberNajlepsiehoKandidataPrePresun(List<Ambulancia> kandidati, MyMessage msg) {
+        if (kandidati.isEmpty()) return null;
 
         Ambulancia najlepsia = null;
         int najlepsiScore = Integer.MIN_VALUE;

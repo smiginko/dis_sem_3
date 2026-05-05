@@ -4,7 +4,6 @@ import OSPABA.*;
 import entity.Ambulancia;
 import simulation.*;
 import entity.Lekar;
-import entity.Sestra;
 import statistiky.TimeWeightedStatistic;
 
 import java.util.ArrayList;
@@ -57,18 +56,18 @@ public class AgentLekarov extends OSPABA.Agent
 
     public Lekar vyberVolnehoLekara(Ambulancia cielovaAmbulancia)
     {
-        StrategiaPridelovania strategia =
-                ((MySimulation) mySim()).getStrategiaPridelovania();
+        StrategiaLekarov strategia =
+                ((MySimulation) mySim()).getStrategiaLekarov();
 
         switch (strategia) {
-            case PRVA_VOLNA:
+            case PRVY_VOLNY_LEKAR:
                 return vyberPrvehoLekara();
 
-            case NAJDLHSIE_VOLNA:
-                return null;
-
-            case MINIMALNY_PRESUN_VYVAZENE_RADY:
+            case LEKAR_V_AMBULANCII_INAK_PRVY_VOLNY:
                 return vyberVolnehoLekaraMinimalnyPresun(cielovaAmbulancia);
+
+            case LEKAR_V_AMBULANCII_INAK_NAJDLHSIE_VOLNY:
+                return vyberVolnehoLekaraNajdlhsieVolny(cielovaAmbulancia);
 
             default:
                 return vyberPrvehoLekara();
@@ -80,6 +79,7 @@ public class AgentLekarov extends OSPABA.Agent
         for (Lekar lekar : lekari) {
             if (!lekar.jeObsadeny()) {
                 lekar.setJeObsadeny(true);
+                lekar.setCasOdKedyJeVolny(0.0);
                 return lekar;
             }
         }
@@ -94,6 +94,7 @@ public class AgentLekarov extends OSPABA.Agent
     {
         if (lekar != null) {
             lekar.setJeObsadeny(false);
+            lekar.setCasOdKedyJeVolny(mySim().currentTime());
             lekar.setAktualnyPacient(null);
             if (lekar.getAktualnaAmbulancia() != null) {
                 lekar.setPoloha(lekar.getAktualnaAmbulancia());
@@ -112,6 +113,7 @@ public class AgentLekarov extends OSPABA.Agent
 
             if (lekar.getPoloha() == cielovaAmbulancia) {
                 lekar.setJeObsadeny(true);
+                lekar.setCasOdKedyJeVolny(0.0);
                 return lekar;
             }
 
@@ -122,9 +124,40 @@ public class AgentLekarov extends OSPABA.Agent
 
         if (vystup != null) {
             vystup.setJeObsadeny(true);
+            vystup.setCasOdKedyJeVolny(0.0);
         }
 
         return vystup;
+    }
+
+    private Lekar vyberVolnehoLekaraNajdlhsieVolny(Ambulancia cielovaAmbulancia) {
+        Lekar najdlhsieVolny = null;
+
+        for (Lekar lekar : lekari) {
+            if (lekar.jeObsadeny()) {
+                continue;
+            }
+
+            if (lekar.getPoloha() == cielovaAmbulancia) {
+                lekar.setJeObsadeny(true);
+                lekar.setCasOdKedyJeVolny(0.0);
+                return lekar;
+            }
+
+            if (najdlhsieVolny == null
+                    || lekar.getCasOdKedyJeVolny() < najdlhsieVolny.getCasOdKedyJeVolny()
+                    || (lekar.getCasOdKedyJeVolny() == najdlhsieVolny.getCasOdKedyJeVolny()
+                    && lekar.id() < najdlhsieVolny.id())) {
+                najdlhsieVolny = lekar;
+            }
+        }
+
+        if (najdlhsieVolny != null) {
+            najdlhsieVolny.setJeObsadeny(true);
+            najdlhsieVolny.setCasOdKedyJeVolny(0.0);
+        }
+
+        return najdlhsieVolny;
     }
 
     public int getPocetObsadenychLekarov() {

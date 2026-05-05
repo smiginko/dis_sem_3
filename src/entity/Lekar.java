@@ -9,10 +9,12 @@ public class Lekar extends Entity {
     private Pacient aktualnyPacient;
     private Ambulancia aktualnaAmbulancia;
     private Ambulancia poloha;
+    private double casOdKedyJeVolny;
 
     public Lekar(Simulation mySim) {
         super(mySim);
         this.jeObsadeny = false;
+        this.casOdKedyJeVolny = mySim.currentTime();
     }
 
     public boolean jeObsadeny() {
@@ -45,5 +47,13 @@ public class Lekar extends Entity {
 
     public void setPoloha(Ambulancia poloha) {
         this.poloha = poloha;
+    }
+
+    public double getCasOdKedyJeVolny() {
+        return casOdKedyJeVolny;
+    }
+
+    public void setCasOdKedyJeVolny(double casOdKedyJeVolny) {
+        this.casOdKedyJeVolny = casOdKedyJeVolny;
     }
 }

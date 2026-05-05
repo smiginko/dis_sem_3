@@ -56,18 +56,18 @@ public class AgentSestier extends OSPABA.Agent
 
     public Sestra vyberVolnuSestru(Ambulancia cielovaAmbulancia)
     {
-        StrategiaPridelovania strategia =
-                ((MySimulation) mySim()).getStrategiaPridelovania();
+        StrategiaSestier strategia =
+                ((MySimulation) mySim()).getStrategiaSestier();
 
         switch (strategia) {
-            case PRVA_VOLNA:
+            case PRVA_VOLNA_SESTRA:
                 return vyberPrvuVolnuSestru();
 
-            case NAJDLHSIE_VOLNA:
-                return null;
-
-            case MINIMALNY_PRESUN_VYVAZENE_RADY:
+            case SESTRA_V_AMBULANCII_INAK_PRVA_VOLNA:
                 return vyberVolnuSestruMinimalnyPresun(cielovaAmbulancia);
+
+            case SESTRA_V_AMBULANCII_INAK_NAJDLHSIE_VOLNA:
+                return vyberVolnuSestruNajdlhsieVolna(cielovaAmbulancia);
 
             default:
                 return vyberPrvuVolnuSestru();
@@ -79,6 +79,7 @@ public class AgentSestier extends OSPABA.Agent
         for (Sestra sestra : sestry) {
             if (!sestra.jeObsadena()) {
                 sestra.setJeObsadena(true);
+                sestra.setCasOdKedyJeVolna(0.0);
                 return sestra;
             }
         }
@@ -94,6 +95,7 @@ public class AgentSestier extends OSPABA.Agent
     {
         if (sestra != null) {
             sestra.setJeObsadena(false);
+            sestra.setCasOdKedyJeVolna(mySim().currentTime());
             sestra.setAktualnyPacient(null);
             if (sestra.getAktualnaAmbulancia() != null) {
                 sestra.setPoloha(sestra.getAktualnaAmbulancia());
@@ -122,6 +124,7 @@ public class AgentSestier extends OSPABA.Agent
 
             if (sestra.getPoloha() == cielovaAmbulancia) {
                 sestra.setJeObsadena(true);
+                sestra.setCasOdKedyJeVolna(0.0);
                 return sestra;
             }
 
@@ -132,9 +135,40 @@ public class AgentSestier extends OSPABA.Agent
 
         if (fallback != null) {
             fallback.setJeObsadena(true);
+            fallback.setCasOdKedyJeVolna(0.0);
         }
 
         return fallback;
+    }
+
+    private Sestra vyberVolnuSestruNajdlhsieVolna(Ambulancia cielovaAmbulancia) {
+        Sestra najdlhsieVolna = null;
+
+        for (Sestra sestra : sestry) {
+            if (sestra.jeObsadena()) {
+                continue;
+            }
+
+            if (sestra.getPoloha() == cielovaAmbulancia) {
+                sestra.setJeObsadena(true);
+                sestra.setCasOdKedyJeVolna(0.0);
+                return sestra;
+            }
+
+            if (najdlhsieVolna == null
+                    || sestra.getCasOdKedyJeVolna() < najdlhsieVolna.getCasOdKedyJeVolna()
+                    || (sestra.getCasOdKedyJeVolna() == najdlhsieVolna.getCasOdKedyJeVolna()
+                    && sestra.id() < najdlhsieVolna.id())) {
+                najdlhsieVolna = sestra;
+            }
+        }
+
+        if (najdlhsieVolna != null) {
+            najdlhsieVolna.setJeObsadena(true);
+            najdlhsieVolna.setCasOdKedyJeVolna(0.0);
+        }
+
+        return najdlhsieVolna;
     }
 
     public void aktualizujVytazenieSestier() {

@@ -3,8 +3,7 @@ package gui;
 import OSPABA.ISimDelegate;
 import OSPABA.SimState;
 import OSPABA.Simulation;
-import simulation.MySimulation;
-import simulation.StrategiaPridelovania;
+import simulation.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -24,6 +23,7 @@ public class MainGui extends JFrame implements ISimDelegate {
     private JButton pauseBtn;
     private JButton resumeBtn;
     private JButton warmupBtn;
+    private JButton personalExperimentBtn;
     private JCheckBox turboCb;
     private boolean finalDialogShown = false;
     private boolean turboRequested = false;
@@ -76,6 +76,9 @@ public class MainGui extends JFrame implements ISimDelegate {
             WarmUpAnalysisFrame f = new WarmUpAnalysisFrame();
             f.setVisible(true);
         });
+
+        personalExperimentBtn = new JButton("Experiment personalu");
+        personalExperimentBtn.addActionListener(e -> showPersonalExperimentDialog());
 
         pauseBtn.addActionListener(e -> sim.pauseSimulation());
         resumeBtn.addActionListener(e -> sim.resumeSimulation());
@@ -138,6 +141,7 @@ public class MainGui extends JFrame implements ISimDelegate {
         topBar.add(resumeBtn);
         topBar.add(stopBtn);
         topBar.add(warmupBtn);
+        topBar.add(personalExperimentBtn);
         topBar.add(new JSeparator(JSeparator.VERTICAL));
         topBar.add(turboCb);
         topBar.add(new JLabel("Rýchlosť:"));
@@ -266,10 +270,14 @@ public class MainGui extends JFrame implements ISimDelegate {
         JSpinner ambBSpinner = new JSpinner(new SpinnerNumberModel(7, 1, 50, 1));
         JSpinner sestrySpinner = new JSpinner(new SpinnerNumberModel(8, 1, 50, 1));
         JSpinner lekariSpinner = new JSpinner(new SpinnerNumberModel(6, 1, 50, 1));
-        JComboBox<StrategiaPridelovania> strategiaBox =
-            new JComboBox<>(StrategiaPridelovania.values());
+        JComboBox<StrategiaAmbulancii> strategiaBox =
+            new JComboBox<>(StrategiaAmbulancii.values());
+        JComboBox<StrategiaSestier> strategiaSestierBox =
+            new JComboBox<>(StrategiaSestier.values());
+        JComboBox<StrategiaLekarov> strategiaLekarovBox =
+            new JComboBox<>(StrategiaLekarov.values());
 
-        JPanel panel = new JPanel(new GridLayout(8, 2, 10, 5));
+        JPanel panel = new JPanel(new GridLayout(10, 2, 10, 5));
         panel.add(new JLabel("Replikácie:")); panel.add(repSpinner);
         panel.add(new JLabel("Čas simulácie (s):")); panel.add(casSpinner);
         panel.add(new JLabel("Zahrievanie (s, 0=vyp):")); panel.add(warmupSpinner);
@@ -277,7 +285,10 @@ public class MainGui extends JFrame implements ISimDelegate {
         panel.add(new JLabel("Ambulancie Typ B:")); panel.add(ambBSpinner);
         panel.add(new JLabel("Sestry:")); panel.add(sestrySpinner);
         panel.add(new JLabel("Lekári:")); panel.add(lekariSpinner);
-        panel.add(new JLabel("Stratégia:")); panel.add(strategiaBox);
+        panel.add(new JLabel("Strategia ambulancii:")); panel.add(strategiaBox);
+
+        panel.add(new JLabel("Strategia sestier:")); panel.add(strategiaSestierBox);
+        panel.add(new JLabel("Strategia lekarov:")); panel.add(strategiaLekarovBox);
 
         if (JOptionPane.showConfirmDialog(this, panel, "Nastavenia simulácie",
                 JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
@@ -296,7 +307,9 @@ public class MainGui extends JFrame implements ISimDelegate {
         sim.setWarmupTime(((Number) warmupSpinner.getValue()).doubleValue());
         sim.setPocetSestier((int) sestrySpinner.getValue());
         sim.setPocetLekarov((int) lekariSpinner.getValue());
-        sim.setStrategiaPridelovania((StrategiaPridelovania) strategiaBox.getSelectedItem());
+        sim.setStrategiaAmbulancii((StrategiaAmbulancii) strategiaBox.getSelectedItem());
+        sim.setStrategiaSestier((StrategiaSestier) strategiaSestierBox.getSelectedItem());
+        sim.setStrategiaLekarov((StrategiaLekarov) strategiaLekarovBox.getSelectedItem());
 
         pripravAnimaciuPreSimulaciu();
 
@@ -375,6 +388,7 @@ public class MainGui extends JFrame implements ISimDelegate {
         stopBtn.setEnabled(running);
         pauseBtn.setEnabled(running);
         resumeBtn.setEnabled(running);
+        personalExperimentBtn.setEnabled(!running);
         turboCb.setEnabled(true);
         speedSlider.setEnabled(!running || !turboCb.isSelected());
     }
@@ -403,5 +417,107 @@ public class MainGui extends JFrame implements ISimDelegate {
 
         animaciaContainer.revalidate();
         animaciaContainer.repaint();
+    }
+
+    /**
+     * Táto časť kódu bola pregenrovaná pomocou AI z riešenia v druhej semestrálnej práce
+     */
+    private void showPersonalExperimentDialog() {
+        JSpinner minSestrySpinner = new JSpinner(new SpinnerNumberModel(4, 1, 50, 1));
+        JSpinner maxSestrySpinner = new JSpinner(new SpinnerNumberModel(14, 1, 50, 1));
+        JSpinner minLekariSpinner = new JSpinner(new SpinnerNumberModel(3, 1, 50, 1));
+        JSpinner maxLekariSpinner = new JSpinner(new SpinnerNumberModel(12, 1, 50, 1));
+        JSpinner repSpinner = new JSpinner(new SpinnerNumberModel(100, 1, 100000, 1));
+        JSpinner casSpinner = new JSpinner(new SpinnerNumberModel(2_419_200, 60, 10_419_200, 60));
+        JSpinner warmupSpinner = new JSpinner(new SpinnerNumberModel(100_000, 0, 10_000_000, 3600));
+        JSpinner ambASpinner = new JSpinner(new SpinnerNumberModel(sim.getPocetAmbulanciiA(), 1, 50, 1));
+        JSpinner ambBSpinner = new JSpinner(new SpinnerNumberModel(sim.getPocetAmbulanciiB(), 1, 50, 1));
+        JComboBox<StrategiaAmbulancii> strategiaBox =
+                new JComboBox<>(StrategiaAmbulancii.values());
+        JComboBox<StrategiaSestier> strategiaSestierBox =
+                new JComboBox<>(StrategiaSestier.values());
+        JComboBox<StrategiaLekarov> strategiaLekarovBox =
+                new JComboBox<>(StrategiaLekarov.values());
+        strategiaBox.setSelectedItem(sim.getStrategiaAmbulancii());
+        strategiaSestierBox.setSelectedItem(sim.getStrategiaSestier());
+        strategiaLekarovBox.setSelectedItem(sim.getStrategiaLekarov());
+
+        JPanel panel = new JPanel(new GridLayout(12, 2, 10, 5));
+        panel.add(new JLabel("Min sestry:")); panel.add(minSestrySpinner);
+        panel.add(new JLabel("Max sestry:")); panel.add(maxSestrySpinner);
+        panel.add(new JLabel("Min lekari:")); panel.add(minLekariSpinner);
+        panel.add(new JLabel("Max lekari:")); panel.add(maxLekariSpinner);
+        panel.add(new JLabel("Replikacie:")); panel.add(repSpinner);
+        panel.add(new JLabel("Cas simulacie (s):")); panel.add(casSpinner);
+        panel.add(new JLabel("Warm-up (s):")); panel.add(warmupSpinner);
+        panel.add(new JLabel("Ambulancie A:")); panel.add(ambASpinner);
+        panel.add(new JLabel("Ambulancie B:")); panel.add(ambBSpinner);
+        panel.add(new JLabel("Strategia ambulancii:")); panel.add(strategiaBox);
+        panel.add(new JLabel("Strategia sestier:")); panel.add(strategiaSestierBox);
+        panel.add(new JLabel("Strategia lekarov:")); panel.add(strategiaLekarovBox);
+
+        if (JOptionPane.showConfirmDialog(this, panel, "Experiment personalu",
+                JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        int minSestry = (int) minSestrySpinner.getValue();
+        int maxSestry = (int) maxSestrySpinner.getValue();
+        int minLekari = (int) minLekariSpinner.getValue();
+        int maxLekari = (int) maxLekariSpinner.getValue();
+
+        if (minSestry > maxSestry || minLekari > maxLekari) {
+            JOptionPane.showMessageDialog(this, "Minimalna hodnota nemoze byt vacsia ako maximalna.");
+            return;
+        }
+
+        personalExperimentBtn.setEnabled(false);
+
+        new SwingWorker<MySimulation.PersonalExperimentResult, Void>() {
+            @Override
+            protected MySimulation.PersonalExperimentResult doInBackground() {
+                MySimulation experimentSim = new MySimulation();
+
+                return experimentSim.runPersonalExperiment(
+                        minSestry,
+                        maxSestry,
+                        minLekari,
+                        maxLekari,
+                        (int) repSpinner.getValue(),
+                        ((Number) casSpinner.getValue()).doubleValue(),
+                        ((Number) warmupSpinner.getValue()).doubleValue(),
+                        (int) ambASpinner.getValue(),
+                        (int) ambBSpinner.getValue(),
+                        (StrategiaAmbulancii) strategiaBox.getSelectedItem(),
+                        (StrategiaSestier) strategiaSestierBox.getSelectedItem(),
+                        (StrategiaLekarov) strategiaLekarovBox.getSelectedItem()
+                );
+            }
+
+            @Override
+            protected void done() {
+                personalExperimentBtn.setEnabled(true);
+
+                try {
+                    MySimulation.PersonalExperimentResult result = get();
+
+                    if (result.found) {
+                        JOptionPane.showMessageDialog(MainGui.this,
+                                "Odporucany pocet sestier: " + result.pocetSestier + "\n"
+                                        + "Odporucany pocet lekarov: " + result.pocetLekarov + "\n"
+                                        + "SANITKA: " + formatCas(result.casSanitka) + "\n"
+                                        + "PESO: " + formatCas(result.casPeso) + "\n\n"
+                                        + "CSV: assets/experiment_personal.csv");
+                    } else {
+                        JOptionPane.showMessageDialog(MainGui.this,
+                                "V zadanom rozsahu sa nenasla vyhovujuca kombinacia.\n"
+                                        + "CSV: assets/experiment_personal.csv");
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(MainGui.this, "Experiment skoncil chybou.");
+                }
+            }
+        }.execute();
     }
 }
