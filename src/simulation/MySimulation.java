@@ -1,6 +1,7 @@
 package simulation;
 
 import agents.agentlekarov.*;
+import OSPABA.*;
 import agents.agentosetrenia.*;
 import agents.agentokolia.*;
 import agents.agentsestier.*;
@@ -10,7 +11,6 @@ import agents.agenturgentu.*;
 import agents.agentambulancii.*;
 import simulation.animacia.AnimaciaUrgentu;
 import statistiky.Statistic;
-
 import java.util.Random;
 
 public class MySimulation extends OSPABA.Simulation

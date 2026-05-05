@@ -72,25 +72,25 @@ public class ManagerVstupnehoVysetrenia extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
+		case Mc.init:
+			processInit(message);
+		break;
+
 		case Mc.finish:
 			switch (message.sender().id())
 			{
-			case Id.presunNaVstupnuKontrolu:
-				processFinishPresunNaVstupnuKontrolu(message);
-			break;
-
 			case Id.vykonanieVysetrenia:
 				processFinishVykonanieVysetrenia(message);
+			break;
+
+			case Id.presunNaVstupnuKontrolu:
+				processFinishPresunNaVstupnuKontrolu(message);
 			break;
 			}
 		break;
 
 		case Mc.vstupneVysetreniePacienta:
 			processVstupneVysetreniePacienta(message);
-		break;
-
-		case Mc.init:
-			processInit(message);
 		break;
 
 		default:

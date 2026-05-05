@@ -51,24 +51,31 @@ public class HlavnyManager extends OSPABA.Manager
 		}
 	}
 
+	//meta! sender="Zahrievanie", id="136", type="Finish"
+	public void processFinish(MessageForm message)
+	{
+	}
+
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public void init()
 	{
-        MyMessage dummy = new MyMessage(mySim());
-        dummy.setCode(Mc.start);
-    }
+	}
 
 	@Override
 	public void processMessage(MessageForm message)
 	{
 		switch (message.code())
 		{
-		case Mc.obsluhaPacienta:
-			processObsluhaPacienta(message);
-		break;
-
 		case Mc.prichodPacienta:
 			processPrichodPacienta(message);
+		break;
+
+		case Mc.finish:
+			processFinish(message);
+		break;
+
+		case Mc.obsluhaPacienta:
+			processObsluhaPacienta(message);
 		break;
 
 		default:

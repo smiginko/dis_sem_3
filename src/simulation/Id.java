@@ -24,10 +24,12 @@ public class Id extends OSPABA.IdList
 	public static final int vykonanieOsetrenia = 1006;
 	public static final int pesoScheduler = 1001;
 	public static final int presunNaVstupnuKontrolu = 1007;
+	public static final int zahrievanie = 1023;
 	public static final int prideleniePriority = 1009;
 	public static final int presunDoCakarne = 1021;
 	public static final int presunDoAmbulancie = 1010;
 	public static final int presunZCakarne = 1022;
+	public static final int peciatkaZahrievania = 1024;
 	public static final int zachrankaScheduler = 1003;
 	public static final int vykonanieVysetrenia = 1004;
 	//meta! tag="end"

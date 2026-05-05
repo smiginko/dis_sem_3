@@ -79,6 +79,11 @@ public class ManagerOkolia extends OSPABA.Manager
 		}
 	}
 
+	//meta! sender="HlavnyAgent", id="138", type="Notice"
+	public void processKoniecZahrievania(MessageForm message)
+	{
+	}
+
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public void init()
 	{
@@ -89,8 +94,12 @@ public class ManagerOkolia extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
-		case Mc.init:
-			processInit(message);
+		case Mc.koniecZahrievania:
+			processKoniecZahrievania(message);
+		break;
+
+		case Mc.odchodPacienta:
+			processOdchodPacienta(message);
 		break;
 
 		case Mc.finish:
@@ -106,8 +115,8 @@ public class ManagerOkolia extends OSPABA.Manager
 			}
 		break;
 
-		case Mc.odchodPacienta:
-			processOdchodPacienta(message);
+		case Mc.init:
+			processInit(message);
 		break;
 
 		default:

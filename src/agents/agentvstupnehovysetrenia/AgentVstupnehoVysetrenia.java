@@ -25,9 +25,9 @@ public class AgentVstupnehoVysetrenia extends OSPABA.Agent
 	private void init()
 	{
 		new ManagerVstupnehoVysetrenia(Id.managerVstupnehoVysetrenia, mySim(), this);
+		new PrideleniePriority(Id.prideleniePriority, mySim(), this);
 		new PresunNaVstupnuKontrolu(Id.presunNaVstupnuKontrolu, mySim(), this);
 		new VykonanieVysetrenia(Id.vykonanieVysetrenia, mySim(), this);
-		new PrideleniePriority(Id.prideleniePriority, mySim(), this);
 		addOwnMessage(Mc.init);
 		addOwnMessage(Mc.vstupneVysetreniePacienta);
 	}

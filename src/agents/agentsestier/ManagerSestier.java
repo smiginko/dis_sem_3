@@ -88,6 +88,11 @@ public class ManagerSestier extends OSPABA.Manager
 		}
 	}
 
+	//meta! sender="AgentUrgentu", id="146", type="Notice"
+	public void processKoniecZahrievania(MessageForm message)
+	{
+	}
+
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public void init()
 	{
@@ -108,6 +113,10 @@ public class ManagerSestier extends OSPABA.Manager
 
 		case Mc.pridelenieSestry:
 			processPridelenieSestry(message);
+		break;
+
+		case Mc.koniecZahrievania:
+			processKoniecZahrievania(message);
 		break;
 
 		default:

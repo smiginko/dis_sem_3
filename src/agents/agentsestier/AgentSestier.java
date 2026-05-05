@@ -42,6 +42,7 @@ public class AgentSestier extends OSPABA.Agent
 		new ManagerSestier(Id.managerSestier, mySim(), this);
 		addOwnMessage(Mc.init);
 		addOwnMessage(Mc.pridelenieSestry);
+		addOwnMessage(Mc.koniecZahrievania);
 		addOwnMessage(Mc.uvolnenieSestry);
 	}
 	//meta! tag="end"

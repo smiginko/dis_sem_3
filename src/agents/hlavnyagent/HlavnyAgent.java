@@ -2,6 +2,7 @@ package agents.hlavnyagent;
 
 import OSPABA.*;
 import simulation.*;
+import agents.hlavnyagent.continualassistants.*;
 
 //meta! id="1"
 public class HlavnyAgent extends OSPABA.Agent
@@ -23,6 +24,7 @@ public class HlavnyAgent extends OSPABA.Agent
 	private void init()
 	{
 		new HlavnyManager(Id.hlavnyManager, mySim(), this);
+		new Zahrievanie(Id.zahrievanie, mySim(), this);
 		addOwnMessage(Mc.obsluhaPacienta);
 		addOwnMessage(Mc.prichodPacienta);
 	}

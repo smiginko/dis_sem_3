@@ -27,11 +27,13 @@ public class AgentUrgentu extends OSPABA.Agent
 		new ManagerUrgentu(Id.managerUrgentu, mySim(), this);
 		new PresunDoCakarne(Id.presunDoCakarne, mySim(), this);
 		new PresunZCakarne(Id.presunZCakarne, mySim(), this);
+		new PeciatkaZahrievania(Id.peciatkaZahrievania, mySim(), this);
 		addOwnMessage(Mc.init);
 		addOwnMessage(Mc.osetreniePacienta);
-		addOwnMessage(Mc.pridelenieAmbulancie);
 		addOwnMessage(Mc.pridelenieSestry);
+		addOwnMessage(Mc.pridelenieAmbulancie);
 		addOwnMessage(Mc.pridelenieLekara);
+		addOwnMessage(Mc.koniecZahrievania);
 		addOwnMessage(Mc.obsluhaPacienta);
 		addOwnMessage(Mc.vstupneVysetreniePacienta);
 	}

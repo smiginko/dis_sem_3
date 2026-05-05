@@ -87,6 +87,11 @@ public class ManagerLekarov extends OSPABA.Manager
 		}
 	}
 
+	//meta! sender="AgentUrgentu", id="144", type="Notice"
+	public void processKoniecZahrievania(MessageForm message)
+	{
+	}
+
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public void init()
 	{
@@ -97,16 +102,20 @@ public class ManagerLekarov extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
-		case Mc.uvolnenieLekara:
-			processUvolnenieLekara(message);
+		case Mc.koniecZahrievania:
+			processKoniecZahrievania(message);
+		break;
+
+		case Mc.pridelenieLekara:
+			processPridelenieLekara(message);
 		break;
 
 		case Mc.init:
 			processInit(message);
 		break;
 
-		case Mc.pridelenieLekara:
-			processPridelenieLekara(message);
+		case Mc.uvolnenieLekara:
+			processUvolnenieLekara(message);
 		break;
 
 		default:

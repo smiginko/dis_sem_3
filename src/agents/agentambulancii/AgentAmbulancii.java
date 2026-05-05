@@ -48,6 +48,7 @@ public class AgentAmbulancii extends OSPABA.Agent
 		new ManagerAmbulancii(Id.managerAmbulancii, mySim(), this);
 		addOwnMessage(Mc.init);
 		addOwnMessage(Mc.pridelenieAmbulancie);
+		addOwnMessage(Mc.koniecZahrievania);
 		addOwnMessage(Mc.uvolnenieAmbulancie);
 	}
 	//meta! tag="end"

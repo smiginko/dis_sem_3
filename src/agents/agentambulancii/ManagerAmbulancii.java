@@ -88,6 +88,11 @@ public class ManagerAmbulancii extends OSPABA.Manager
         skusPridatAmbulanciuDalsiemu();
 	}
 
+	//meta! sender="AgentUrgentu", id="148", type="Notice"
+	public void processKoniecZahrievania(MessageForm message)
+    {
+    }
+
 	//meta! userInfo="Process messages defined in code", id="0"
 	public void processDefault(MessageForm message)
 	{
@@ -106,16 +111,20 @@ public class ManagerAmbulancii extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
-		case Mc.pridelenieAmbulancie:
-			processPridelenieAmbulancie(message);
-		break;
-
 		case Mc.init:
 			processInit(message);
 		break;
 
+		case Mc.pridelenieAmbulancie:
+			processPridelenieAmbulancie(message);
+		break;
+
 		case Mc.uvolnenieAmbulancie:
 			processUvolnenieAmbulancie(message);
+		break;
+
+		case Mc.koniecZahrievania:
+			processKoniecZahrievania(message);
 		break;
 
 		default:

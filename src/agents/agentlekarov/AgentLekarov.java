@@ -43,6 +43,7 @@ public class AgentLekarov extends OSPABA.Agent
 		new ManagerLekarov(Id.managerLekarov, mySim(), this);
 		addOwnMessage(Mc.init);
 		addOwnMessage(Mc.pridelenieLekara);
+		addOwnMessage(Mc.koniecZahrievania);
 		addOwnMessage(Mc.uvolnenieLekara);
 	}
 	//meta! tag="end"

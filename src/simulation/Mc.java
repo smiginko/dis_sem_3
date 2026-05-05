@@ -6,6 +6,7 @@ public class Mc extends OSPABA.IdList
 {
 	//meta! userInfo="Generated code: do not modify", tag="begin"
 	public static final int init = 1001;
+	public static final int koniecZahrievania = 1023;
 	public static final int prichodPacienta = 1002;
 	public static final int odchodPacienta = 1003;
 	public static final int obsluhaPacienta = 1005;

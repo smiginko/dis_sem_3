@@ -28,6 +28,7 @@ public class AgentOkolia extends OSPABA.Agent
 		new PesoScheduler(Id.pesoScheduler, mySim(), this);
 		addOwnMessage(Mc.init);
 		addOwnMessage(Mc.odchodPacienta);
+		addOwnMessage(Mc.koniecZahrievania);
 	}
 	//meta! tag="end"
 }

@@ -69,25 +69,25 @@ public class ManagerOsetrenia extends OSPABA.Manager
 	{
 		switch (message.code())
 		{
-		case Mc.finish:
-			switch (message.sender().id())
-			{
-			case Id.vykonanieOsetrenia:
-				processFinishVykonanieOsetrenia(message);
-			break;
-
-			case Id.presunDoAmbulancie:
-				processFinishPresunDoAmbulancie(message);
-			break;
-			}
+		case Mc.init:
+			processInit(message);
 		break;
 
 		case Mc.osetreniePacienta:
 			processOsetreniePacienta(message);
 		break;
 
-		case Mc.init:
-			processInit(message);
+		case Mc.finish:
+			switch (message.sender().id())
+			{
+			case Id.presunDoAmbulancie:
+				processFinishPresunDoAmbulancie(message);
+			break;
+
+			case Id.vykonanieOsetrenia:
+				processFinishVykonanieOsetrenia(message);
+			break;
+			}
 		break;
 
 		default:
