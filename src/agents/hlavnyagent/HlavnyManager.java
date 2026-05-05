@@ -22,6 +22,13 @@ public class HlavnyManager extends OSPABA.Manager
 		{
 			petriNet().clear();
 		}
+        double warmupTime = ((MySimulation) mySim()).getWarmupTime();
+
+        if (warmupTime > 0) {
+            MyMessage msg = new MyMessage(mySim());
+            msg.setAddressee(Id.zahrievanie);
+            startContinualAssistant(msg);
+        }
 	}
 
 	//meta! sender="AgentUrgentu", id="18", type="Response"
@@ -54,6 +61,17 @@ public class HlavnyManager extends OSPABA.Manager
 	//meta! sender="Zahrievanie", id="136", type="Finish"
 	public void processFinish(MessageForm message)
 	{
+        if (message.sender().id() == Id.zahrievanie) {
+            MyMessage u = new MyMessage(mySim());
+            u.setCode(Mc.koniecZahrievania);
+            u.setAddressee(Id.agentUrgentu);
+            notice(u);
+
+            MyMessage o = new MyMessage(mySim());
+            o.setCode(Mc.koniecZahrievania);
+            o.setAddressee(Id.agentOkolia);
+            notice(o);
+        }
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"

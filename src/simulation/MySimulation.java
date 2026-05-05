@@ -11,6 +11,9 @@ import agents.agenturgentu.*;
 import agents.agentambulancii.*;
 import simulation.animacia.AnimaciaUrgentu;
 import statistiky.Statistic;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class MySimulation extends OSPABA.Simulation
@@ -35,13 +38,20 @@ public class MySimulation extends OSPABA.Simulation
 
     private final java.util.List<String> logs = new java.util.ArrayList<>();
 
+    private double warmupTime = 0;
+
+    private boolean collectAnalysisData = false;
+    private final List<Double> analysisTimes = new ArrayList<>();
+    private final List<Double> analysisValues = new ArrayList<>();
+    public static final double SNAPSHOT_INTERVAL = 300.0;
+
     Random seedGenerator;
 
     private int pocetAmbulanciiA = 5;
     private int pocetAmbulanciiB = 7;
 
-    private int pocetSestier = 5;
-    private int pocetLekarov = 4;
+    private int pocetSestier = 8;
+    private int pocetLekarov = 6;
 
 	public MySimulation()
 	{
@@ -309,6 +319,20 @@ public AgentLekarov agentLekarov()
         return animaciaUrgentu;
     }
 
+    public void recordSnapshot(double value) {
+        if (!collectAnalysisData) return;
+        analysisTimes.add(currentTime());
+        analysisValues.add(value);
+    }
+
+    public void clearAnalysisSnapshots() { analysisTimes.clear(); analysisValues.clear(); }
+    public List<Double> getAnalysisTimes()  { return new ArrayList<>(analysisTimes); }
+    public List<Double> getAnalysisValues() { return new ArrayList<>(analysisValues); }
+    public boolean isCollectAnalysisData()  { return collectAnalysisData; }
+    public void setCollectAnalysisData(boolean v) { collectAnalysisData = v; }
+    public double getWarmupTime()           { return warmupTime; }
+    public void setWarmupTime(double t)     { this.warmupTime = t; }
+
     private String formatCas(double totalSeconds) {
         if (Double.isNaN(totalSeconds) || totalSeconds < 0) return "00:00:00";
         int total = (int) Math.round(totalSeconds);
@@ -325,4 +349,5 @@ public AgentLekarov agentLekarov()
     public Statistic getGlobVytazenieSestier() { return globVytazenieSestier; }
     public Statistic getGlobVytazenieAmbulanciiA() { return globVytazenieAmbulanciiA; }
     public Statistic getGlobVytazenieAmbulanciiB() { return globVytazenieAmbulanciiB; }
+
 }

@@ -91,6 +91,9 @@ public class ManagerSestier extends OSPABA.Manager
 	//meta! sender="AgentUrgentu", id="146", type="Notice"
 	public void processKoniecZahrievania(MessageForm message)
 	{
+        double now = mySim().currentTime();
+
+        vytazenieSestryStat.reset(now, 0);
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"

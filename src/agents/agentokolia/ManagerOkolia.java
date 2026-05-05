@@ -82,6 +82,7 @@ public class ManagerOkolia extends OSPABA.Manager
 	//meta! sender="HlavnyAgent", id="138", type="Notice"
 	public void processKoniecZahrievania(MessageForm message)
 	{
+        celkovyCasVSystemeStat.reset();
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"

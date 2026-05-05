@@ -91,6 +91,10 @@ public class ManagerAmbulancii extends OSPABA.Manager
 	//meta! sender="AgentUrgentu", id="148", type="Notice"
 	public void processKoniecZahrievania(MessageForm message)
     {
+        double now = mySim().currentTime();
+
+        vytazenieAmbulanciiA.reset(now, 0);
+        vytazenieAmbulanciiB.reset(now, 0);
     }
 
 	//meta! userInfo="Process messages defined in code", id="0"

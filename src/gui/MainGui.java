@@ -23,6 +23,7 @@ public class MainGui extends JFrame implements ISimDelegate {
     private JButton stopBtn;
     private JButton pauseBtn;
     private JButton resumeBtn;
+    private JButton warmupBtn;
     private JCheckBox turboCb;
     private boolean finalDialogShown = false;
     private boolean turboRequested = false;
@@ -60,12 +61,18 @@ public class MainGui extends JFrame implements ISimDelegate {
         startBtn = new JButton("Štart");
         pauseBtn = new JButton("Pauza");
         resumeBtn = new JButton("Pokračovať");
+        warmupBtn = new JButton("Warm-up analýza");
         stopBtn = new JButton("Stop");
         pauseBtn.setEnabled(false);
         resumeBtn.setEnabled(false);
         stopBtn.setEnabled(false);
 
         startBtn.addActionListener(e -> showStartDialog());
+
+        warmupBtn.addActionListener(e -> {
+            WarmUpAnalysisFrame f = new WarmUpAnalysisFrame();
+            f.setVisible(true);
+        });
 
         pauseBtn.addActionListener(e -> sim.pauseSimulation());
         resumeBtn.addActionListener(e -> sim.resumeSimulation());
@@ -127,6 +134,7 @@ public class MainGui extends JFrame implements ISimDelegate {
         topBar.add(pauseBtn);
         topBar.add(resumeBtn);
         topBar.add(stopBtn);
+        topBar.add(warmupBtn);
         topBar.add(new JSeparator(JSeparator.VERTICAL));
         topBar.add(turboCb);
         topBar.add(new JLabel("Rýchlosť:"));
@@ -242,6 +250,7 @@ public class MainGui extends JFrame implements ISimDelegate {
     private void showStartDialog() {
         JSpinner repSpinner = new JSpinner(new SpinnerNumberModel(1000, 1, 100000, 1));
         JSpinner casSpinner = new JSpinner(new SpinnerNumberModel(2_419_200, 60, 10_419_200, 60));
+        JSpinner warmupSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 10_000_000, 3600));
         JSpinner ambASpinner = new JSpinner(new SpinnerNumberModel(5, 1, 50, 1));
         JSpinner ambBSpinner = new JSpinner(new SpinnerNumberModel(7, 1, 50, 1));
         JSpinner sestrySpinner = new JSpinner(new SpinnerNumberModel(8, 1, 50, 1));
@@ -249,9 +258,10 @@ public class MainGui extends JFrame implements ISimDelegate {
         JComboBox<StrategiaPridelovania> strategiaBox =
             new JComboBox<>(StrategiaPridelovania.values());
 
-        JPanel panel = new JPanel(new GridLayout(7, 2, 10, 5));
+        JPanel panel = new JPanel(new GridLayout(8, 2, 10, 5));
         panel.add(new JLabel("Replikácie:")); panel.add(repSpinner);
         panel.add(new JLabel("Čas simulácie (s):")); panel.add(casSpinner);
+        panel.add(new JLabel("Zahrievanie (s, 0=vyp):")); panel.add(warmupSpinner);
         panel.add(new JLabel("Ambulancie Typ A:")); panel.add(ambASpinner);
         panel.add(new JLabel("Ambulancie Typ B:")); panel.add(ambBSpinner);
         panel.add(new JLabel("Sestry:")); panel.add(sestrySpinner);
@@ -271,6 +281,7 @@ public class MainGui extends JFrame implements ISimDelegate {
         sim = new MySimulation();
         sim.setPocetAmbulanciiA((int) ambASpinner.getValue());
         sim.setPocetAmbulanciiB((int) ambBSpinner.getValue());
+        sim.setWarmupTime(((Number) warmupSpinner.getValue()).doubleValue());
         sim.setPocetSestier((int) sestrySpinner.getValue());
         sim.setPocetLekarov((int) lekariSpinner.getValue());
         sim.setStrategiaPridelovania((StrategiaPridelovania) strategiaBox.getSelectedItem());
@@ -294,7 +305,7 @@ public class MainGui extends JFrame implements ISimDelegate {
         setRunningControls(true);
 
         int repCount = (int) repSpinner.getValue();
-        double simTime = ((Number) casSpinner.getValue()).doubleValue();
+        double simTime = ((Number) casSpinner.getValue()).doubleValue() + sim.getWarmupTime();
         new Thread(() -> {
             sim.simulate(repCount, simTime);
             SwingUtilities.invokeLater(() -> setRunningControls(false));

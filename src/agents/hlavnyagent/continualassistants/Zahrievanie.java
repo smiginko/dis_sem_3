@@ -22,6 +22,13 @@ public class Zahrievanie extends OSPABA.Scheduler
 	//meta! sender="HlavnyAgent", id="136", type="Start"
 	public void processStart(MessageForm message)
 	{
+        double warmupTime = ((MySimulation) mySim()).getWarmupTime();
+
+        if (message.lastPost() == MessageForm.PostType.start) {
+            hold(warmupTime, message);
+        } else {
+            assistantFinished(message);
+        }
 	}
 
 	//meta! userInfo="Process messages defined in code", id="0"

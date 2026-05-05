@@ -22,7 +22,12 @@ public class PeciatkaZahrievania extends OSPABA.Scheduler
 	//meta! sender="AgentUrgentu", id="151", type="Start"
 	public void processStart(MessageForm message)
 	{
-	}
+        if (message.lastPost() == MessageForm.PostType.start) {
+            hold(MySimulation.SNAPSHOT_INTERVAL, message);
+        } else {
+            assistantFinished(message);
+        }
+    }
 
 	//meta! userInfo="Process messages defined in code", id="0"
 	public void processDefault(MessageForm message)

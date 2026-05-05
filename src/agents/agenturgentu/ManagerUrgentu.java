@@ -28,6 +28,8 @@ public class ManagerUrgentu extends OSPABA.Manager
     private Statistic casVCakarniVstupneSanitkaStat;
     private Statistic[] casVCakarniOsetreniePrioritaStat;
 
+    private int pocetPacientovVSysteme = 0;
+
 	public ManagerUrgentu(int id, Simulation mySim, Agent myAgent)
 	{
 		super(id, mySim, myAgent);
@@ -50,6 +52,7 @@ public class ManagerUrgentu extends OSPABA.Manager
 
         pocetCakajucichNaVstupne = 0;
         pocetCakajucichNaOsetrenie = 0;
+        pocetPacientovVSysteme = 0;
 
         dlzkaRaduVstupne = new TimeWeightedStatistic(
                 "Priemerna dlzka radu na vstupne vysetrenie",
@@ -70,6 +73,12 @@ public class ManagerUrgentu extends OSPABA.Manager
         for (int priorita = 1; priorita <= 5; priorita++) {
             casVCakarniOsetreniePrioritaStat[priorita] =
                     new Statistic("Cas cakania na osetrenie - priorita " + priorita);
+        }
+
+        if (((MySimulation) mySim()).isCollectAnalysisData()) {
+            MyMessage msg = new MyMessage(mySim());
+            msg.setAddressee(Id.peciatkaZahrievania);
+            startContinualAssistant(msg);
         }
 	}
 
@@ -180,6 +189,8 @@ public class ManagerUrgentu extends OSPABA.Manager
         ((MySimulation) mySim()).log("Urgent prevzal pacienta id=" + msg.getPacient().id()
                 + " typ=" + msg.getPacient().getTyp());
 
+        pocetPacientovVSysteme++;
+
         msg.setFazaPacienta(MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE);
         msg.setPovolenaAmbulanciaA(false);
         msg.setPovolenaAmbulanciaB(true);
@@ -244,6 +255,8 @@ public class ManagerUrgentu extends OSPABA.Manager
 
         ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id() + " dokončil odchod z urgentu");
 
+        pocetPacientovVSysteme--;
+
         message.setCode(Mc.obsluhaPacienta);
         response(message);
 	}
@@ -251,11 +264,28 @@ public class ManagerUrgentu extends OSPABA.Manager
 	//meta! sender="HlavnyAgent", id="140", type="Notice"
 	public void processKoniecZahrievania(MessageForm message)
 	{
+        double now = mySim().currentTime();
+        dlzkaRaduVstupne.reset(now, 0);
+        dlzkaRaduOsetrenie.reset(now, 0);
+        casVCakarniVstupnePesoStat.reset();
+        casVCakarniVstupneSanitkaStat.reset();
+        for (int i = 1; i <= 5; i++) casVCakarniOsetreniePrioritaStat[i].reset();
+
+        for (int agentId : new int[]{Id.agentSestier, Id.agentLekarov, Id.agentAmbulancii}) {
+            MyMessage m = new MyMessage(mySim());
+            m.setCode(Mc.koniecZahrievania);
+            m.setAddressee(agentId);
+            notice(m);
+        }
 	}
 
 	//meta! sender="PeciatkaZahrievania", id="151", type="Finish"
 	public void processFinishPeciatkaZahrievania(MessageForm message)
 	{
+        ((MySimulation) mySim()).recordSnapshot(pocetPacientovVSysteme);
+
+        message.setAddressee(Id.peciatkaZahrievania);
+        startContinualAssistant(message);
 	}
 
 	//meta! userInfo="Generated code: do not modify", tag="begin"
