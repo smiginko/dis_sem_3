@@ -90,4 +90,16 @@ public class AgentLekarov extends OSPABA.Agent
             lekar.setAktualnaAmbulancia(null);
         }
     }
+
+    public int getPocetObsadenychLekarov() {
+        int pocet = 0;
+
+        for (Lekar lekar : lekari) {
+            if (lekar.jeObsadeny()) {
+                pocet++;
+            }
+        }
+
+        return pocet;
+    }
 }

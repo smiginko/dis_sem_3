@@ -37,12 +37,12 @@ public class AnimaciaUrgentu {
         sestraItems.clear();
         lekarItems.clear();
 
-        for (int i = 0; i < 100; i++) {
-            volneCakarenSloty.add(i);
-        }
-
         if (!sim.animatorExists()) {
             return;
+        }
+
+        for (int i = 0; i < 100; i++) {
+            volneCakarenSloty.add(i);
         }
 
         sim.animator().clearAll();

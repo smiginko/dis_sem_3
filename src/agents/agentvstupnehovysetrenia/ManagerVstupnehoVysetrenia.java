@@ -2,6 +2,7 @@ package agents.agentvstupnehovysetrenia;
 
 import OSPABA.*;
 import simulation.*;
+import statistiky.Statistic;
 
 //meta! id="19"
 public class ManagerVstupnehoVysetrenia extends OSPABA.Manager

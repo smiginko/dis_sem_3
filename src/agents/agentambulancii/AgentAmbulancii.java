@@ -99,4 +99,30 @@ public class AgentAmbulancii extends OSPABA.Agent
     public List<Ambulancia> getAmbulancies() {
         return ambulancie;
     }
+
+    public int getPocetObsadenychAmbulanciiA() {
+        int pocet = 0;
+
+        for (Ambulancia ambulancia : ambulancie) {
+            if (ambulancia.getTyp() == Ambulancia.TypeAmbulancia.TYP_A
+                    && ambulancia.isJeObsadena()) {
+                pocet++;
+            }
+        }
+
+        return pocet;
+    }
+
+    public int getPocetObsadenychAmbulanciiB() {
+        int pocet = 0;
+
+        for (Ambulancia ambulancia : ambulancie) {
+            if (ambulancia.getTyp() == Ambulancia.TypeAmbulancia.TYP_B
+                    && ambulancia.isJeObsadena()) {
+                pocet++;
+            }
+        }
+
+        return pocet;
+    }
 }

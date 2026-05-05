@@ -22,7 +22,7 @@ public class PesoScheduler extends OSPABA.Scheduler
 		super.prepareReplication();
 		// Setup component for the next replication
         MySimulation mySimulation = (MySimulation) mySim();
-        this.generator = new ExponentialDistribution(mySimulation.getSeedGenerator(), 129.14);
+        this.generator = new ExponentialDistribution(mySimulation.getSeedGenerator(), 574.8);
 	}
 
 	//meta! sender="AgentOkolia", id="6", type="Start"

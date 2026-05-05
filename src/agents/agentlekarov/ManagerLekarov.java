@@ -3,6 +3,7 @@ package agents.agentlekarov;
 import OSPABA.*;
 import entity.Lekar;
 import simulation.*;
+import statistiky.TimeWeightedStatistic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.PriorityQueue;
 public class ManagerLekarov extends OSPABA.Manager
 {
     PriorityQueue<MyMessage> radCakajucich;
+
+    TimeWeightedStatistic vytazenieLekarovStat;
 
     public List<MyMessage> getRadCakajucich() {
         return new ArrayList<>(radCakajucich);
@@ -34,6 +37,9 @@ public class ManagerLekarov extends OSPABA.Manager
 			petriNet().clear();
 		}
         this.radCakajucich = new PriorityQueue<>(MyMessage.PORADIE);
+
+        vytazenieLekarovStat = new TimeWeightedStatistic("Vytazenie lekarov",
+                mySim().currentTime(), 0);
 	}
 
 	//meta! sender="AgentUrgentu", id="49", type="Notice"
@@ -50,6 +56,8 @@ public class ManagerLekarov extends OSPABA.Manager
 
         if (volnyLekar != null) {
             msg.setLekar(volnyLekar);
+            vytazenieLekarovStat.update((double) myAgent().getPocetObsadenychLekarov() / ((MySimulation) mySim()).getPocetLekarov(),
+                    mySim().currentTime());
             response(msg);
         } else {
             ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
@@ -64,6 +72,9 @@ public class ManagerLekarov extends OSPABA.Manager
         MyMessage msg = (MyMessage) message;
 
         myAgent().uvolniLekara(msg.getLekar());
+
+        vytazenieLekarovStat.update((double) myAgent().getPocetObsadenychLekarov() / ((MySimulation) mySim()).getPocetLekarov(),
+                mySim().currentTime());
 
         skusPridatLekaraDalsiemu();
 	}
@@ -118,9 +129,14 @@ public class ManagerLekarov extends OSPABA.Manager
             if (volnyLekar != null) {
                 MyMessage cakajucaSprava = radCakajucich.poll();
                 cakajucaSprava.setLekar(volnyLekar);
+                vytazenieLekarovStat.update((double) myAgent().getPocetObsadenychLekarov() / ((MySimulation) mySim()).getPocetLekarov(),
+                        mySim().currentTime());
                 response(cakajucaSprava);
             }
         }
     }
 
+    public TimeWeightedStatistic getVytazenieLekarovStat() {
+        return vytazenieLekarovStat;
+    }
 }

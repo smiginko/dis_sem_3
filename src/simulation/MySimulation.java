@@ -1,7 +1,6 @@
 package simulation;
 
 import agents.agentlekarov.*;
-import OSPABA.*;
 import agents.agentosetrenia.*;
 import agents.agentokolia.*;
 import agents.agentsestier.*;
@@ -10,11 +9,24 @@ import agents.agentvstupnehovysetrenia.*;
 import agents.agenturgentu.*;
 import agents.agentambulancii.*;
 import simulation.animacia.AnimaciaUrgentu;
+import statistiky.Statistic;
 
 import java.util.Random;
 
 public class MySimulation extends OSPABA.Simulation
 {
+
+    private Statistic globCasVCakarniVstupnePeso;
+    private Statistic globCasVCakarniVstupneSanitka;
+    private Statistic[] globCasVCakarniOsetreniePriorita = new Statistic[6];
+    private Statistic globCelkovyCasVSysteme;
+    private Statistic globDlzkaRaduVstupne;
+    private Statistic globDlzkaRaduOsetrenie;
+    private Statistic globVytazenieLekarov;
+    private Statistic globVytazenieSestier;
+    private Statistic globVytazenieAmbulanciiA;
+    private Statistic globVytazenieAmbulanciiB;
+
     private AnimaciaUrgentu animaciaUrgentu;
     private StrategiaPridelovania strategiaPridelovania = StrategiaPridelovania.PRVA_VOLNA;
 
@@ -43,6 +55,25 @@ public class MySimulation extends OSPABA.Simulation
 		super.prepareSimulation();
 		// Create global statistcis
         this.seedGenerator = new Random();
+
+        globCasVCakarniVstupnePeso = new Statistic("Priemerny cas v cakarni (peso)");
+        globCasVCakarniVstupneSanitka =  new Statistic("Priemerny cas v cakarni (sanitka)");
+
+        this.globCasVCakarniOsetreniePriorita = new Statistic[6];
+        for (int priorita = 1; priorita <= 5; priorita++) {
+            this.globCasVCakarniOsetreniePriorita[priorita] =
+                    new Statistic("Cas v cakarni pred osetrenim - priorita " + priorita);
+        }
+
+        this.globCelkovyCasVSysteme = new Statistic("Celkovy cas pacienta v systeme");
+
+        this.globDlzkaRaduVstupne = new Statistic("Priemerna dlzka radu na vstupne vysetrenie");
+        this.globDlzkaRaduOsetrenie = new Statistic("Priemerna dlzka radu na osetrenie");
+
+        this.globVytazenieLekarov = new Statistic("Vytazenie lekarov");
+        this.globVytazenieSestier = new Statistic("Vytazenie sestier");
+        this.globVytazenieAmbulanciiA = new Statistic("Vytazenie ambulancii typ A");
+        this.globVytazenieAmbulanciiB = new Statistic("Vytazenie ambulancii typ B");
 	}
 
 	@Override
@@ -69,8 +100,63 @@ public class MySimulation extends OSPABA.Simulation
 	public void replicationFinished()
 	{
 		// Collect local statistics into global, update UI, etc...
-		super.replicationFinished();
-	}
+
+        ManagerOkolia managerOkolia = (ManagerOkolia) agentOkolia().myManager();
+        ManagerUrgentu managerUrgentu = (ManagerUrgentu) agentUrgentu().myManager();
+        ManagerAmbulancii managerAmbulancii = (ManagerAmbulancii) agentAmbulancii().myManager();
+        ManagerSestier managerSestier = (ManagerSestier) agentSestier().myManager();
+        ManagerLekarov managerLekarov = (ManagerLekarov) agentLekarov().myManager();
+
+        if (managerOkolia.getCelkovyCasVSystemeStat().getCount() > 0) {
+            globCelkovyCasVSysteme.addValue(managerOkolia.getCelkovyCasVSystemeStat().getAverage());
+        }
+
+        if (managerUrgentu.getCasVCakarniVstupnePesoStat().getCount() > 0) {
+            globCasVCakarniVstupnePeso.addValue(
+                    managerUrgentu.getCasVCakarniVstupnePesoStat().getAverage()
+            );
+        }
+
+        if (managerUrgentu.getCasVCakarniVstupneSanitkaStat().getCount() > 0) {
+            globCasVCakarniVstupneSanitka.addValue(
+                    managerUrgentu.getCasVCakarniVstupneSanitkaStat().getAverage()
+            );
+        }
+
+        for (int priorita = 1; priorita <= 5; priorita++) {
+            Statistic lokalna = managerUrgentu.getCasVCakarniOsetreniePriorita(priorita);
+
+            if (lokalna.getCount() > 0) {
+                globCasVCakarniOsetreniePriorita[priorita].addValue(lokalna.getAverage());
+            }
+        }
+
+        globDlzkaRaduVstupne.addValue(
+                managerUrgentu.getDlzkaRaduVstupne().getAverage(currentTime())
+        );
+
+        globDlzkaRaduOsetrenie.addValue(
+                managerUrgentu.getDlzkaRaduOsetrenie().getAverage(currentTime())
+        );
+
+        globVytazenieAmbulanciiA.addValue(
+                managerAmbulancii.getVytazenieAmbulanciiA().getAverage(currentTime())
+        );
+
+        globVytazenieAmbulanciiB.addValue(
+                managerAmbulancii.getVytazenieAmbulanciiB().getAverage(currentTime())
+        );
+
+        globVytazenieSestier.addValue(
+                managerSestier.getVytazenieSestryStat().getAverage(currentTime())
+        );
+
+        globVytazenieLekarov.addValue(
+                managerLekarov.getVytazenieLekarovStat().getAverage(currentTime())
+        );
+
+        super.replicationFinished();
+    }
 
 	@Override
 	public void simulationFinished()
@@ -228,4 +314,15 @@ public AgentLekarov agentLekarov()
         int total = (int) Math.round(totalSeconds);
         return String.format("%02d:%02d:%02d", total / 3600, (total % 3600) / 60, total % 60);
     }
+
+    public Statistic getGlobCasVCakarniVstupnePeso() { return globCasVCakarniVstupnePeso; }
+    public Statistic getGlobCasVCakarniVstupneSanitka() { return globCasVCakarniVstupneSanitka; }
+    public Statistic getGlobCasVCakarniOsetreniePriorita(int priorita) { return globCasVCakarniOsetreniePriorita[priorita]; }
+    public Statistic getGlobCelkovyCasVSysteme() { return globCelkovyCasVSysteme; }
+    public Statistic getGlobDlzkaRaduVstupne() { return globDlzkaRaduVstupne; }
+    public Statistic getGlobDlzkaRaduOsetrenie() { return globDlzkaRaduOsetrenie; }
+    public Statistic getGlobVytazenieLekarov() { return globVytazenieLekarov; }
+    public Statistic getGlobVytazenieSestier() { return globVytazenieSestier; }
+    public Statistic getGlobVytazenieAmbulanciiA() { return globVytazenieAmbulanciiA; }
+    public Statistic getGlobVytazenieAmbulanciiB() { return globVytazenieAmbulanciiB; }
 }

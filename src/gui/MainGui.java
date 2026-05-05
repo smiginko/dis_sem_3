@@ -27,6 +27,7 @@ public class MainGui extends JFrame implements ISimDelegate {
     private boolean finalDialogShown = false;
     private boolean turboRequested = false;
     private int selectedSpeedIndex = 0;
+    private JTextArea statistikyArea;
 
     private static final int[] SPEED_MULTIPLIERS = {1, 2, 3, 5, 10, 50, 100, 1000};
 
@@ -45,6 +46,7 @@ public class MainGui extends JFrame implements ISimDelegate {
 
         sim.registerDelegate(new FrontyObserver(vstupneTable, osetreniTable));
         sim.registerDelegate(new ZdrojeObserver(ambulancieTable, sestryTable, lekariTable));
+        sim.registerDelegate(new StatistikyObserver(statistikyArea));
         sim.registerDelegate(this);
     }
 
@@ -156,17 +158,29 @@ public class MainGui extends JFrame implements ISimDelegate {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // CENTER: fronty
-        JPanel frontyPanel = new JPanel(new GridLayout(2, 1, 5, 10));
+        JPanel centerPanel = new JPanel(new BorderLayout(5, 10));
+        JPanel frontyPanel = new JPanel(new GridLayout(1, 2, 5, 0));
+        frontyPanel.setPreferredSize(new Dimension(0, 210));
         frontyPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
 
         vstupneTable = createTable();
         osetreniTable = createTable();
+
+        statistikyArea = new JTextArea();
+        statistikyArea.setEditable(false);
+        statistikyArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        statistikyArea.setBackground(new Color(250, 250, 250));
 
         frontyPanel.add(createTableWrapper(vstupneTable,
             "FRONT – Vstupné vyšetrenie", "#", "PacientID", "Typ", "Stav", "Príchod"));
         frontyPanel.add(createTableWrapper(osetreniTable,
             "FRONT – Ošetrenie", "#", "PacientID", "Typ", "Priorita", "Stav"));
 
+        JScrollPane statistikyScroll = new JScrollPane(statistikyArea);
+        statistikyScroll.setBorder(BorderFactory.createTitledBorder("ŠTATISTIKY"));
+
+        centerPanel.add(frontyPanel, BorderLayout.NORTH);
+        centerPanel.add(statistikyScroll, BorderLayout.CENTER);
         // EAST: zdroje
         JPanel zdrojePanel = new JPanel(new GridLayout(3, 1, 5, 10));
         zdrojePanel.setPreferredSize(new Dimension(380, 0));
@@ -182,7 +196,7 @@ public class MainGui extends JFrame implements ISimDelegate {
         zdrojePanel.add(createTableWrapper(lekariTable,
             "LEKÁRI", "ID", "Stav", "Pacient"));
 
-        panel.add(new JScrollPane(frontyPanel), BorderLayout.CENTER);
+        panel.add(centerPanel, BorderLayout.CENTER);
         panel.add(zdrojePanel, BorderLayout.EAST);
         return panel;
     }
@@ -226,12 +240,12 @@ public class MainGui extends JFrame implements ISimDelegate {
     }
 
     private void showStartDialog() {
-        JSpinner repSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 100000, 1));
-        JSpinner casSpinner = new JSpinner(new SpinnerNumberModel(3600, 60, 86400, 60));
+        JSpinner repSpinner = new JSpinner(new SpinnerNumberModel(1000, 1, 100000, 1));
+        JSpinner casSpinner = new JSpinner(new SpinnerNumberModel(2_419_200, 60, 10_419_200, 60));
         JSpinner ambASpinner = new JSpinner(new SpinnerNumberModel(5, 1, 50, 1));
         JSpinner ambBSpinner = new JSpinner(new SpinnerNumberModel(7, 1, 50, 1));
-        JSpinner sestrySpinner = new JSpinner(new SpinnerNumberModel(5, 1, 50, 1));
-        JSpinner lekariSpinner = new JSpinner(new SpinnerNumberModel(4, 1, 50, 1));
+        JSpinner sestrySpinner = new JSpinner(new SpinnerNumberModel(8, 1, 50, 1));
+        JSpinner lekariSpinner = new JSpinner(new SpinnerNumberModel(6, 1, 50, 1));
         JComboBox<StrategiaPridelovania> strategiaBox =
             new JComboBox<>(StrategiaPridelovania.values());
 
@@ -274,6 +288,7 @@ public class MainGui extends JFrame implements ISimDelegate {
 
         sim.registerDelegate(new FrontyObserver(vstupneTable, osetreniTable));
         sim.registerDelegate(new ZdrojeObserver(ambulancieTable, sestryTable, lekariTable));
+        sim.registerDelegate(new StatistikyObserver(statistikyArea));
         sim.registerDelegate(this);
 
         setRunningControls(true);
@@ -289,16 +304,18 @@ public class MainGui extends JFrame implements ISimDelegate {
     @Override
     public void refresh(Simulation simulation) {
         MySimulation s = (MySimulation) simulation;
+
+        if (s.isMaxSpeed()) {
+            return;
+        }
+
         java.util.List<String> newLogs = s.getNewLogs();
+
         SwingUtilities.invokeLater(() -> {
-            if (s.isMaxSpeed()) {
-                timeLabel.setText("--- TURBO ---");
-                timeLabel.setForeground(Color.BLUE);
-            } else {
-                timeLabel.setText(formatCas(s.currentTime()));
-                timeLabel.setForeground(Color.BLACK);
-            }
+            timeLabel.setText(formatCas(s.currentTime()));
+            timeLabel.setForeground(Color.BLACK);
             repLabel.setText("Rep: " + s.currentReplication());
+
             for (String log : newLogs) logArea.append(log + "\n");
             if (!newLogs.isEmpty()) logArea.setCaretPosition(logArea.getDocument().getLength());
         });
@@ -308,6 +325,10 @@ public class MainGui extends JFrame implements ISimDelegate {
     public void simStateChanged(Simulation simulation, SimState state) {
         MySimulation s = (MySimulation) simulation;
         SwingUtilities.invokeLater(() -> {
+            if (state == SimState.replicationStopped) {
+                repLabel.setText("Rep: " + s.currentReplication());
+            }
+
             if (state == SimState.stopped) {
                 timeLabel.setText("SKONČENÉ");
                 timeLabel.setForeground(new Color(0, 150, 0));

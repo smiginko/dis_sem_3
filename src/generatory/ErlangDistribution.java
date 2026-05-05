@@ -8,6 +8,8 @@ public class ErlangDistribution {
     private final double lambda; // rate = k / mean
 
     /**
+     * Tento kód je vygenerovaný umelou inteligenciu - kapitola 3 dokumentácie AI
+     *
      * @param random seed source
      * @param k      shape (počet fáz, kladné celé číslo)
      * @param mean   stredná hodnota celého rozdelenia (= k / lambda)

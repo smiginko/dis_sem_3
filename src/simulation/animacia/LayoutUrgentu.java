@@ -9,12 +9,12 @@ public final class LayoutUrgentu {
     public static final double AMBULANCIA_W = 160;
     public static final double AMBULANCIA_H = 44;
 
-    public static final double CAKAREN_X = 260;
+    public static final double CAKAREN_X = 550; 
     public static final double CAKAREN_Y = 120;
     public static final double CAKAREN_W = 360;
     public static final double CAKAREN_H = 300;
 
-    private static final double SLOT_START_X = 300;
+    private static final double SLOT_START_X = 590; 
     private static final double SLOT_START_Y = 170;
     private static final double SLOT_GAP_X = 34;
     private static final double SLOT_GAP_Y = 34;
@@ -58,6 +58,6 @@ public final class LayoutUrgentu {
     }
 
     public static Point2D.Double ambulanciaPozicia(int index) {
-        return new Point2D.Double(930, 80 + index * 58);
+        return new Point2D.Double(1080, 80 + index * 58);
     }
 }

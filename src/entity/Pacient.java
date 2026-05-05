@@ -14,6 +14,7 @@ public class Pacient extends Entity {
     private double casPrichodu;
     private int priorita;
     private Ambulancia aktualnaAmbulancia;
+    private Ambulancia poloha;
     private Sestra aktualnaSestra;
     private Lekar aktualnyLekar;
 
@@ -22,6 +23,7 @@ public class Pacient extends Entity {
         this.typ = typ;
         this.casPrichodu = casPrichodu;
         this.aktualnaAmbulancia = null;
+        this.poloha = null;
         this.aktualnaSestra = null;
         this.aktualnyLekar = null;
         this.inicializujPrioritu(typ);
@@ -57,6 +59,14 @@ public class Pacient extends Entity {
 
     public void setAktualnaAmbulancia(Ambulancia aktualnaAmbulancia) {
         this.aktualnaAmbulancia = aktualnaAmbulancia;
+    }
+
+    public Ambulancia getPoloha() {
+        return poloha;
+    }
+
+    public void setPoloha(Ambulancia poloha) {
+        this.poloha = poloha;
     }
 
     public Sestra getAktualnaSestra() {

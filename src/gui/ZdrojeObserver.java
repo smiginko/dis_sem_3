@@ -15,6 +15,19 @@ import java.awt.*;
 import java.util.List;
 
 public class ZdrojeObserver implements ISimDelegate {
+
+    private static class ZdrojRow {
+        final int id;
+        final String stlpec2;
+        final String stlpec3;
+
+        ZdrojRow(int id, String stlpec2, String stlpec3) {
+            this.id = id;
+            this.stlpec2 = stlpec2;
+            this.stlpec3 = stlpec3;
+        }
+    }
+
     private final JTable ambulancieTable;
     private final JTable sestryTable;
     private final JTable lekariTable;
@@ -32,16 +45,17 @@ public class ZdrojeObserver implements ISimDelegate {
     @Override
     public void refresh(Simulation sim) {
         if (sim.isMaxSpeed()) return;
+
         MySimulation s = (MySimulation) sim;
 
-        List<Ambulancia> ambulancie = s.agentAmbulancii().getAmbulancies();
-        List<Sestra> sestry = s.agentSestier().getSestry();
-        List<Lekar> lekari = s.agentLekarov().getLekari();
+        List<ZdrojRow> ambulancieSnapshot = vytvorAmbulancieSnapshot(s);
+        List<ZdrojRow> sestrySnapshot = vytvorSestrySnapshot(s);
+        List<ZdrojRow> lekariSnapshot = vytvorLekariSnapshot(s);
 
         SwingUtilities.invokeLater(() -> {
-            updateAmbulancieTable(ambulancie);
-            updateSestryTable(sestry);
-            updateLekariTable(lekari);
+            updateTable(ambulancieTable, ambulancieSnapshot);
+            updateTable(sestryTable, sestrySnapshot);
+            updateTable(lekariTable, lekariSnapshot);
         });
     }
 
@@ -56,44 +70,15 @@ public class ZdrojeObserver implements ISimDelegate {
         }
     }
 
-    private void updateAmbulancieTable(List<Ambulancia> ambulancie) {
-        DefaultTableModel model = (DefaultTableModel) ambulancieTable.getModel();
+    private void updateTable(JTable table, List<ZdrojRow> rows) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
-        for (Ambulancia a : ambulancie) {
-            model.addRow(new Object[]{
-                a.id(),
-                a.getTyp(),
-                a.isJeObsadena() ? "OBSADENÁ" : "VOĽNÁ"
-            });
-        }
-    }
 
-    private void updateSestryTable(List<Sestra> sestry) {
-        DefaultTableModel model = (DefaultTableModel) sestryTable.getModel();
-        model.setRowCount(0);
-        for (Sestra s : sestry) {
-            String pacientInfo = s.getAktualnyPacient() != null
-                ? "Pac. " + s.getAktualnyPacient().id()
-                : "-";
+        for (ZdrojRow row : rows) {
             model.addRow(new Object[]{
-                s.id(),
-                s.jeObsadena() ? "OBSADENÁ" : "VOĽNÁ",
-                pacientInfo
-            });
-        }
-    }
-
-    private void updateLekariTable(List<Lekar> lekari) {
-        DefaultTableModel model = (DefaultTableModel) lekariTable.getModel();
-        model.setRowCount(0);
-        for (Lekar l : lekari) {
-            String pacientInfo = l.getAktualnyPacient() != null
-                ? "Pac. " + l.getAktualnyPacient().id()
-                : "-";
-            model.addRow(new Object[]{
-                l.id(),
-                l.jeObsadeny() ? "OBSADENÝ" : "VOĽNÝ",
-                pacientInfo
+                    row.id,
+                    row.stlpec2,
+                    row.stlpec3
             });
         }
     }
@@ -123,5 +108,55 @@ public class ZdrojeObserver implements ISimDelegate {
             }
             return c;
         }
+    }
+
+    private List<ZdrojRow> vytvorAmbulancieSnapshot(MySimulation s) {
+        List<ZdrojRow> rows = new java.util.ArrayList<>();
+
+        for (Ambulancia a : s.agentAmbulancii().getAmbulancies()) {
+            rows.add(new ZdrojRow(
+                    a.id(),
+                    a.getTyp().toString(),
+                    a.isJeObsadena() ? "OBSADENÁ" : "VOĽNÁ"
+            ));
+        }
+
+        return rows;
+    }
+
+    private List<ZdrojRow> vytvorSestrySnapshot(MySimulation s) {
+        List<ZdrojRow> rows = new java.util.ArrayList<>();
+
+        for (Sestra sestra : s.agentSestier().getSestry()) {
+            String pacientInfo = sestra.getAktualnyPacient() != null
+                    ? "Pac. " + sestra.getAktualnyPacient().id()
+                    : "-";
+
+            rows.add(new ZdrojRow(
+                    sestra.id(),
+                    sestra.jeObsadena() ? "OBSADENÁ" : "VOĽNÁ",
+                    pacientInfo
+            ));
+        }
+
+        return rows;
+    }
+
+    private List<ZdrojRow> vytvorLekariSnapshot(MySimulation s) {
+        List<ZdrojRow> rows = new java.util.ArrayList<>();
+
+        for (Lekar lekar : s.agentLekarov().getLekari()) {
+            String pacientInfo = lekar.getAktualnyPacient() != null
+                    ? "Pac. " + lekar.getAktualnyPacient().id()
+                    : "-";
+
+            rows.add(new ZdrojRow(
+                    lekar.id(),
+                    lekar.jeObsadeny() ? "OBSADENÝ" : "VOĽNÝ",
+                    pacientInfo
+            ));
+        }
+
+        return rows;
     }
 }

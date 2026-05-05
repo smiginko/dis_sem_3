@@ -14,6 +14,40 @@ import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public class FrontyObserver implements ISimDelegate {
+
+    private static class VstupneRow {
+        final int poradie;
+        final int pacientId;
+        final String typ;
+        final String stav;
+        final String prichod;
+
+        VstupneRow(int poradie, int pacientId, String typ, String stav, String prichod) {
+            this.poradie = poradie;
+            this.pacientId = pacientId;
+            this.typ = typ;
+            this.stav = stav;
+            this.prichod = prichod;
+        }
+    }
+
+    private static class OsetrenieRow {
+        final int poradie;
+        final int pacientId;
+        final String typ;
+        final int priorita;
+        final String stav;
+
+        OsetrenieRow(int poradie, int pacientId, String typ, int priorita, String stav) {
+            this.poradie = poradie;
+            this.pacientId = pacientId;
+            this.typ = typ;
+            this.priorita = priorita;
+            this.stav = stav;
+        }
+    }
+
+
     private final JTable vstupneTable;
     private final JTable osetreniTable;
 
@@ -25,21 +59,15 @@ public class FrontyObserver implements ISimDelegate {
     @Override
     public void refresh(Simulation sim) {
         if (sim.isMaxSpeed()) return;
+
         MySimulation s = (MySimulation) sim;
 
-        List<MyMessage> vstupneUrgent = s.agentUrgentu().getRadNaVstupneVysetrenie();
-        List<MyMessage> osetrenieUrgent = s.agentUrgentu().getRadNaOsetrenie();
-        
-        List<MyMessage> ambulancieRad = s.agentAmbulancii().getRadCakajucich();
-        List<MyMessage> sestryRad = s.agentSestier().getRadCakajucich();
-        List<MyMessage> lekariRad = s.agentLekarov().getRadCakajucich();
-        
-        List<Sestra> sestry = s.agentSestier().getSestry();
-        List<Lekar> lekari = s.agentLekarov().getLekari();
+        List<VstupneRow> vstupneSnapshot = vytvorVstupneSnapshot(s);
+        List<OsetrenieRow> osetrenieSnapshot = vytvorOsetrenieSnapshot(s);
 
         SwingUtilities.invokeLater(() -> {
-            updateVstupneTable(vstupneUrgent, ambulancieRad, sestryRad, sestry);
-            updateOsetreniTable(osetrenieUrgent, ambulancieRad, lekariRad, sestryRad, lekari);
+            updateVstupneTable(vstupneSnapshot);
+            updateOsetreniTable(osetrenieSnapshot);
         });
     }
 
@@ -53,86 +81,130 @@ public class FrontyObserver implements ISimDelegate {
         }
     }
 
-    private void updateVstupneTable(List<MyMessage> urgent, List<MyMessage> ambRad, List<MyMessage> sestryRad, List<Sestra> sestry) {
+    private void updateVstupneTable(List<VstupneRow> rows) {
         DefaultTableModel model = (DefaultTableModel) vstupneTable.getModel();
         model.setRowCount(0);
-        int index = 1;
-        
-        // 1. Urgentny rad
-        for (MyMessage msg : urgent) {
-            Pacient p = msg.getPacient();
+
+        for (VstupneRow row : rows) {
             model.addRow(new Object[]{
-                index++, p.id(), p.getTyp(), "Čaká v čakárni",
-                String.format("%.1f s", p.getCasPrichodu())
+                    row.poradie,
+                    row.pacientId,
+                    row.typ,
+                    row.stav,
+                    row.prichod
             });
-        }
-        
-        // 2. Rad na ambulanciu
-        for (MyMessage msg : ambRad) {
-            if (msg.getFazaPacienta() == MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE) {
-                Pacient p = msg.getPacient();
-                model.addRow(new Object[]{
-                    index++, p.id(), p.getTyp(), "Čaká na ambulanciu",
-                    String.format("%.1f s", p.getCasPrichodu())
-                });
-            }
-        }
-        
-        // 3. Rad na sestru
-        for (MyMessage msg : sestryRad) {
-            if (msg.getFazaPacienta() == MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE) {
-                Pacient p = msg.getPacient();
-                model.addRow(new Object[]{
-                    index++, p.id(), p.getTyp(), "Čaká na sestru",
-                    String.format("%.1f s", p.getCasPrichodu())
-                });
-            }
         }
     }
 
-    private void updateOsetreniTable(List<MyMessage> urgent, List<MyMessage> ambRad, List<MyMessage> lekariRad, List<MyMessage> sestryRad, List<Lekar> lekari) {
+    private void updateOsetreniTable(List<OsetrenieRow> rows) {
         DefaultTableModel model = (DefaultTableModel) osetreniTable.getModel();
         model.setRowCount(0);
-        int index = 1;
-        
-        // 1. Urgentny rad
-        for (MyMessage msg : urgent) {
-            Pacient p = msg.getPacient();
+
+        for (OsetrenieRow row : rows) {
             model.addRow(new Object[]{
-                index++, p.id(), p.getTyp(), p.getPriorita(), "Čaká na pridelenie"
+                    row.poradie,
+                    row.pacientId,
+                    row.typ,
+                    row.priorita,
+                    row.stav
             });
         }
-        
-        // 2. Rad na ambulanciu
-        for (MyMessage msg : ambRad) {
-            if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
-                Pacient p = msg.getPacient();
-                model.addRow(new Object[]{
-                    index++, p.id(), p.getTyp(), p.getPriorita(), "Čaká na ambulanciu"
-                });
-            }
-        }
-        
-        // 3. Rad na lekára
-        for (MyMessage msg : lekariRad) {
-            if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
-                Pacient p = msg.getPacient();
-                model.addRow(new Object[]{
-                    index++, p.id(), p.getTyp(), p.getPriorita(), "Čaká na lekára"
-                });
-            }
-        }
-        
-        // 4. Rad na sestru
-        for (MyMessage msg : sestryRad) {
-            if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
-                Pacient p = msg.getPacient();
-                model.addRow(new Object[]{
-                    index++, p.id(), p.getTyp(), p.getPriorita(), "Čaká na sestru"
-                });
-            }
-        }
     }
+
+    private List<VstupneRow> vytvorVstupneSnapshot(MySimulation s) {
+        List<VstupneRow> rows = new java.util.ArrayList<>();
+        int index = 1;
+
+        for (MyMessage msg : s.agentUrgentu().getRadNaVstupneVysetrenie()) {
+            rows.add(new VstupneRow(
+                    index++,
+                    msg.getPacient().id(),
+                    msg.getPacient().getTyp().toString(),
+                    "Čaká v čakárni",
+                    String.format("%.1f s", msg.getPacient().getCasPrichodu())
+            ));
+        }
+
+        for (MyMessage msg : s.agentAmbulancii().getRadCakajucich()) {
+            if (msg.getFazaPacienta() == MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE) {
+                rows.add(new VstupneRow(
+                        index++,
+                        msg.getPacient().id(),
+                        msg.getPacient().getTyp().toString(),
+                        "Čaká na ambulanciu",
+                        String.format("%.1f s", msg.getPacient().getCasPrichodu())
+                ));
+            }
+        }
+
+        for (MyMessage msg : s.agentSestier().getRadCakajucich()) {
+            if (msg.getFazaPacienta() == MyMessage.FazaPacienta.VSTUPNE_VYSETRENIE) {
+                rows.add(new VstupneRow(
+                        index++,
+                        msg.getPacient().id(),
+                        msg.getPacient().getTyp().toString(),
+                        "Čaká na sestru",
+                        String.format("%.1f s", msg.getPacient().getCasPrichodu())
+                ));
+            }
+        }
+
+        return rows;
+    }
+
+    private List<OsetrenieRow> vytvorOsetrenieSnapshot(MySimulation s) {
+        List<OsetrenieRow> rows = new java.util.ArrayList<>();
+        int index = 1;
+
+        for (MyMessage msg : s.agentUrgentu().getRadNaOsetrenie()) {
+            rows.add(new OsetrenieRow(
+                    index++,
+                    msg.getPacient().id(),
+                    msg.getPacient().getTyp().toString(),
+                    msg.getPacient().getPriorita(),
+                    "Čaká na pridelenie"
+            ));
+        }
+
+        for (MyMessage msg : s.agentAmbulancii().getRadCakajucich()) {
+            if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
+                rows.add(new OsetrenieRow(
+                        index++,
+                        msg.getPacient().id(),
+                        msg.getPacient().getTyp().toString(),
+                        msg.getPacient().getPriorita(),
+                        "Čaká na ambulanciu"
+                ));
+            }
+        }
+
+        for (MyMessage msg : s.agentLekarov().getRadCakajucich()) {
+            if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
+                rows.add(new OsetrenieRow(
+                        index++,
+                        msg.getPacient().id(),
+                        msg.getPacient().getTyp().toString(),
+                        msg.getPacient().getPriorita(),
+                        "Čaká na lekára"
+                ));
+            }
+        }
+
+        for (MyMessage msg : s.agentSestier().getRadCakajucich()) {
+            if (msg.getFazaPacienta() == MyMessage.FazaPacienta.OSETRENIE) {
+                rows.add(new OsetrenieRow(
+                        index++,
+                        msg.getPacient().id(),
+                        msg.getPacient().getTyp().toString(),
+                        msg.getPacient().getPriorita(),
+                        "Čaká na sestru"
+                ));
+            }
+        }
+
+        return rows;
+    }
+
 
     private void clearTable(JTable table) {
         ((DefaultTableModel) table.getModel()).setRowCount(0);

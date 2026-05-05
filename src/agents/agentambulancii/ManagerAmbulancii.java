@@ -3,6 +3,7 @@ package agents.agentambulancii;
 import OSPABA.*;
 import entity.Ambulancia;
 import simulation.*;
+import statistiky.TimeWeightedStatistic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,9 @@ import java.util.PriorityQueue;
 public class ManagerAmbulancii extends OSPABA.Manager
 {
     PriorityQueue<MyMessage> radCakajucich;
+
+    private TimeWeightedStatistic vytazenieAmbulanciiA;
+    private TimeWeightedStatistic vytazenieAmbulanciiB;
 
     public List<MyMessage> getRadCakajucich() {
         return new ArrayList<>(radCakajucich);
@@ -34,6 +38,18 @@ public class ManagerAmbulancii extends OSPABA.Manager
 			petriNet().clear();
 		}
         this.radCakajucich = new PriorityQueue<>(MyMessage.PORADIE);
+
+        this.vytazenieAmbulanciiA = new TimeWeightedStatistic(
+                "Vytazenie ambulancii typ A",
+                mySim().currentTime(),
+                0
+        );
+
+        this.vytazenieAmbulanciiB = new TimeWeightedStatistic(
+                "Vytazenie ambulancii typ B",
+                mySim().currentTime(),
+                0
+        );
 	}
 
 	//meta! sender="AgentUrgentu", id="31", type="Notice"
@@ -50,6 +66,7 @@ public class ManagerAmbulancii extends OSPABA.Manager
 
         if (volnaAmbulancia != null) {
             msg.setAmbulancia(volnaAmbulancia);
+            aktualizujVytazenieAmbulancii();
             response(msg);
         } else {
             ((MySimulation) mySim()).log("Pacient id=" + msg.getPacient().id()
@@ -65,6 +82,8 @@ public class ManagerAmbulancii extends OSPABA.Manager
         MyMessage msg = (MyMessage) message;
 
         myAgent().uvolniAmbulanciu(msg.getAmbulancia());
+
+        aktualizujVytazenieAmbulancii();
 
         skusPridatAmbulanciuDalsiemu();
 	}
@@ -118,9 +137,37 @@ public class ManagerAmbulancii extends OSPABA.Manager
             if (a != null) {
                 radCakajucich.remove(msg);
                 msg.setAmbulancia(a);
+                aktualizujVytazenieAmbulancii();
                 response(msg);
                 break;
             }
         }
+    }
+
+    public TimeWeightedStatistic getVytazenieAmbulanciiA() {
+        return vytazenieAmbulanciiA;
+    }
+
+    public TimeWeightedStatistic getVytazenieAmbulanciiB() {
+        return vytazenieAmbulanciiB;
+    }
+
+    private void aktualizujVytazenieAmbulancii() {
+        MySimulation sim = (MySimulation) mySim();
+
+        double vytazenieA = 0.0;
+        if (sim.getPocetAmbulanciiA() > 0) {
+            vytazenieA = (double) myAgent().getPocetObsadenychAmbulanciiA()
+                    / sim.getPocetAmbulanciiA();
+        }
+
+        double vytazenieB = 0.0;
+        if (sim.getPocetAmbulanciiB() > 0) {
+            vytazenieB = (double) myAgent().getPocetObsadenychAmbulanciiB()
+                    / sim.getPocetAmbulanciiB();
+        }
+
+        vytazenieAmbulanciiA.update(vytazenieA, mySim().currentTime());
+        vytazenieAmbulanciiB.update(vytazenieB, mySim().currentTime());
     }
 }

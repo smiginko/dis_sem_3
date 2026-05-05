@@ -90,4 +90,14 @@ public class AgentSestier extends OSPABA.Agent
             sestra.setAktualnaAmbulancia(null);
         }
     }
+
+    public int getPocetObsadenychSestier() {
+        int pocet = 0;
+        for (Sestra sestra : sestry) {
+            if (sestra.jeObsadena()) {
+                pocet++;
+            }
+        }
+        return pocet;
+    }
 }
